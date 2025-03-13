@@ -17,9 +17,10 @@ def create_app(test_config=None):
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    from . import home
+    app.register_blueprint(home.bp)
+
+    from . import sim
+    app.register_blueprint(sim.bp)
 
     return app
