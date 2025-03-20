@@ -1,30 +1,105 @@
+<style>
+  table {
+    border-collapse: collapse;
+    width: 50%;
+  }
+  td, th {
+    border: 1px solid black;
+    padding: 8px;
+  }
+</style>
+
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Taskset{% endblock %}</h1>
+  <h1>{% block title %}Sim Setup{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
+  <h2>Upload an existing Setup</h2>
+  <input type="file">
 
-    <h3>Create a new Taskset</h3>
-    <input type="text" placeholder="Task Name"/>
-    <input type="number" placeholder="Minimal Period"/>
-    <input type="number" placeholder="Deadline"/>
-    <input type="number" placeholder="WCET"/>
-    
-    <button>Add Task</button>
-    
-    <ul></ul>
+  <h2>Settings</h2>
+  <input type="radio" id="pip" name="resource_strat">
+  <label for="pip">Priority Inheritance Protocol</label><br>
 
-    <h3>Choose an existing Taskset</h3>
+  <input type="radio" id="pcp" name="resource_strat">
+  <label for="pcp">Priority Ceiling Protocol</label><br>
+  
+  <input type="radio" id="no" name="resource_strat">
+  <label for="no">No Deadlock-Avoidance Strategy</label><br>
 
-    <h3>Upload an existing Taskset</h3>
-    <input type="file">
+  <br>
+  <br>
+  <select>
+    <option>Earliest Deadline First (EDF)</option>
+    <option>Least Laxity First (LLF)</option>
+    <option>Modified Least Laxity First (MLLF)</option>
+    <option>Rate Monotonic Scheduling (RMS)</option>
+    <option>Fixed Priority Scheduling (FPS)</option>
+  </select>
+  
+  <h2>Resources</h2>
+  <input type="text" placeholder="Resource Name" />
+  <input type="text" placeholder="Priority" />
+  <button>Add Resource</button>
 
-    <br>
-    <br>
+  <table>
+    <tr>
+      <th>Resource Name</th>
+      <th>Priority</th>
+      <th>Actions</th>
+    </tr>
+    <tr>
+      <td>Resource 1</td>
+      <td>1</td>
+      <td><button>Remove Resource</button></td>
+    </tr>
+    <tr>
+      <td>Resource 2</td>
+      <td>3</td>
+      <td><button>Remove Resource</button></td>
+    </tr>
+  </table> 
 
-    <a href="{{ url_for('sim.result')}}">
-        <button>Run Simulation</button>
-    </a>
+
+  <h2>Taskset</h2>
+  <input type="text" placeholder="Task Name"/>
+  <input type="number" placeholder="Minimal Period"/>
+  <input type="number" placeholder="Deadline"/>
+  <input type="number" placeholder="WCET"/>
+  
+  <button>Add Task</button>
+  
+  <table>
+    <tr>
+      <th>Task Name</th>
+      <th>Minimal Period</th>
+      <th>Deadline</th>
+      <th>WCET</th>
+      <th>Actions</th>
+    </tr>
+    <tr>
+      <td>Task 1</td>
+      <td>35</td>
+      <td>10</td>
+      <td>7</td>
+      <td><button>Remove Task</button></td>
+    </tr>
+    <tr>
+      <td>Task 2</td>
+      <td>90</td>
+      <td>4</td>
+      <td>2</td>
+      <td><button>Remove Task</button></td>
+    </tr>
+  </table> 
+
+
+  <br>
+  <br>
+
+  <a href="{{ url_for('sim.result')}}">
+      <button>Run Simulation</button>
+  </a>
 {% endblock %}
