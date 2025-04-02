@@ -1,10 +1,61 @@
 <script>
 
+  const RESOURCE_KEY = "RESOURCES";
+  const TASKSET_KEY = "TASKSET";
+
+  function updateResourceTable() {
+    const resource_table = document.getElementById('resource_table');
+    const resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
+
+    resource_table.innerHTML = "";
+    var header_row = resource_table.insertRow(0);
+
+    var header_cell_name = header_row.insertCell();
+    var header_cell_actions = header_row.insertCell();
+
+    header_cell_name.innerHTML = "Resource Name";
+    header_cell_actions.innerHTML = "Actions";
+
+    var i = 0;
+    resources.forEach(resource => {
+      var row = resource_table.insertRow(1);
+      var cell_name = row.insertCell();
+      var cell_actions = row.insertCell();
+
+      cell_name.innerHTML = resource;
+      cell_actions.innerHTML = `<button onclick="deleteResource(${i})">remove resource</button>`;
+
+      i++;
+    })
+  }
+
   function createResource() {
     const resource_name_input = document.getElementById('resource_name');
     const resource_name = resource_name_input.value;
 
-    sessionStorage.setItem(sessionStorage.length, resource_name);
+    var resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
+
+    if (!resources) {
+      resources = [];
+    }
+
+    resources.push(resource_name);
+    sessionStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
+
+    updateResourceTable();
+  }
+
+  function deleteResource(index) {
+    if (typeof index !== 'number' || isNaN(index)) {
+      console.error("No index provided, couldn't delete resource: ", index);
+      return;
+    }
+
+    var resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
+    resources.splice(index, 1);
+    sessionStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
+
+    updateResourceTable();
   }
 
   function toggleResourceElements() {
@@ -13,6 +64,11 @@
       e.style.display = isResourceToggleChecked ? "block" : "none";
     })
   }
+
+
+  window.addEventListener("storage", updateResourceTable);
+  window.addEventListener("DOMContentLoaded", updateResourceTable);
+
 </script>
 
 <style>
@@ -39,7 +95,7 @@
 <input type="file">
 
 <h2>Settings</h2>
-<input type="checkbox" id="resources_activated" value="resources_activated" onchange="toggleResourceElements()">
+<input type="checkbox" id="resources_activated" value="resources_activated" onchange="toggleResourceElements()" checked>
 <label for="resources_activated">Resources</label><br>
 
 <div name="resource_setting">
@@ -66,22 +122,7 @@
   <input type="text" id="resource_name" placeholder="Resource Name" />
   <button onclick="createResource()">Add Resource</button>
 
-  <table>
-    <tr>
-      <th>Resource Name</th>
-      <th>Priority</th>
-      <th>Actions</th>
-    </tr>
-    <tr>
-      <td>Resource 1</td>
-      <td>1</td>
-      <td><button>Remove Resource</button></td>
-    </tr>
-    <tr>
-      <td>Resource 2</td>
-      <td>3</td>
-      <td><button>Remove Resource</button></td>
-    </tr>
+  <table id="resource_table">
   </table>
 </div>
 
