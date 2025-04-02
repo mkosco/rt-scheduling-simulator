@@ -1,3 +1,12 @@
+<script>
+  function toggleResourceElements() {
+    const isResourceToggleChecked = document.getElementById('resources_activated').checked;
+    document.getElementsByName('resource_setting').forEach(e => {
+      e.style.display = isResourceToggleChecked ? "block" : "none";
+    })
+  }
+</script>
+
 <style>
   table {
     border-collapse: collapse;
@@ -20,6 +29,10 @@
   <input type="file">
 
   <h2>Settings</h2>
+<input type="checkbox" id="resources_activated" value="resources_activated" onchange="toggleResourceElements()">
+<label for="resources_activated">Resources</label><br>
+
+<div name="resource_setting">
   <input type="radio" id="pip" name="resource_strat">
   <label for="pip">Priority Inheritance Protocol</label><br>
 
@@ -28,6 +41,7 @@
   
   <input type="radio" id="no" name="resource_strat">
   <label for="no">No Deadlock-Avoidance Strategy</label><br>
+</div>
   
   <select>
     <option>Earliest Deadline First (EDF)</option>
@@ -37,6 +51,7 @@
     <option>Fixed Priority Scheduling (FPS)</option>
   </select>
   
+<div name="resource_setting">
   <h2>Resources</h2>
   <input type="text" placeholder="Resource Name" />
   <input type="text" placeholder="Priority" />
@@ -59,7 +74,7 @@
       <td><button>Remove Resource</button></td>
     </tr>
   </table> 
-
+</div>
 
   <h2>Taskset</h2>
   <input type="text" placeholder="Task Name"/>
