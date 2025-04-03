@@ -1,17 +1,98 @@
 <script>
-
   const RESOURCE_KEY = "RESOURCES";
   const TASKSET_KEY = "TASKSET";
 
-  // Resource specific Functions
-  function updateResourceTable() {
-    const resource_table = document.getElementById('resource_table');
-    const resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
+  function storeElementInSession(element, sessionItemKey) {
+    var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
 
-    updateHiddenResourceFormField(JSON.stringify(resources));
+    if (!sessionArray) {
+      sessionArray = [];
+    }
 
-    resource_table.innerHTML = "";
-    var header_row = resource_table.insertRow(0);
+    sessionArray.push(element);
+    sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
+
+    updateTable(sessionItemKey);
+  }
+
+  function deleteElementFromSession(index, sessionItemKey) {
+    if (typeof index !== 'number' || isNaN(index)) {
+      console.error("No index provided, couldn't delete resource: ", index);
+      return;
+    }
+
+    var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+    sessionArray.splice(index, 1);
+    sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
+
+    updateTable(sessionItemKey);
+  }
+
+  function updateTable(sessionItemKey) {
+    var elementId;
+
+    if (sessionItemKey === RESOURCE_KEY) {
+      elementId = "resource_table";
+    } else if (sessionItemKey === TASKSET_KEY) {
+      elementId = "task_table";
+    }
+
+    if (!elementId) {
+      console.error("No elementId could be found, no table updated. The following sessionItemKey was provided: ", sessionItemKey);
+      return;
+    }
+
+    const table = document.getElementById(elementId);
+    const sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+
+    updateHiddenFormField(sessionItemKey, JSON.stringify(sessionArray));
+
+    table.innerHTML = "";
+
+    if (sessionItemKey === RESOURCE_KEY) {
+      populateResourceTable(table, sessionArray);
+    } else if (sessionItemKey === TASKSET_KEY) {
+      populateTasksTable(table, sessionArray);
+    }
+  }
+
+  function updateHiddenFormField(sessionItemKey, fieldValue) {
+    var elementId;
+
+    if (sessionItemKey === RESOURCE_KEY) {
+      elementId = "resources_hidden_input";
+    } else if (sessionItemKey === TASKSET_KEY) {
+      elementId = "tasks_hidden_input";
+    }
+
+    if (!elementId) {
+      console.error("No elementId could be found, no hidden form field updated. The following sessionItemKey was provided: ", sessionItemKey);
+      return;
+    }
+
+    const hidden_field = document.getElementById(elementId);
+
+    if (hidden_field)
+      hidden_field.value = fieldValue;
+  }
+
+  function createTask() {
+    const task_name = document.getElementById('task_name').value;
+    const task_min_period = document.getElementById('task_min_period').value;
+    const task_deadline = document.getElementById('task_deadline').value;
+    const task_wcet = document.getElementById('task_wcet').value;
+
+    storeElementInSession({ name: task_name, min_period: task_min_period, deadline: task_deadline, wcet: task_wcet }, TASKSET_KEY);
+  }
+
+  function createResource() {
+    const resource_name = document.getElementById('resource_name').value;
+
+    storeElementInSession(resource_name, RESOURCE_KEY);
+  }
+
+  function populateResourceTable(table, sessionArray) {
+    var header_row = table.insertRow(0);
 
     var header_cell_name = header_row.insertCell();
     var header_cell_actions = header_row.insertCell();
@@ -20,89 +101,19 @@
     header_cell_actions.innerHTML = "Actions";
 
     var i = 0;
-    resources?.forEach(resource => {
-      var row = resource_table.insertRow(1);
+    sessionArray?.forEach(resource => {
+      var row = table.insertRow(1);
       var cell_name = row.insertCell();
       var cell_actions = row.insertCell();
 
       cell_name.innerHTML = resource;
-      cell_actions.innerHTML = `<button onclick="deleteResource(${i})">remove resource</button>`;
+      cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${RESOURCE_KEY}')" type="button">remove resource</button>`;
 
       i++;
     })
   }
 
-  function createResource() {
-    const resource_name = document.getElementById('resource_name').value;
-
-    var resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
-
-    if (!resources) {
-      resources = [];
-    }
-
-    resources.push(resource_name);
-    sessionStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
-
-    updateResourceTable();
-  }
-
-  function updateHiddenResourceFormField(resources) {
-    const hidden_resource_field = document.getElementById('resources_hidden_input');
-    hidden_resource_field.value = resources;
-  }
-
-  function deleteResource(index) {
-    if (typeof index !== 'number' || isNaN(index)) {
-      console.error("No index provided, couldn't delete resource: ", index);
-      return;
-    }
-
-    var resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
-    resources.splice(index, 1);
-    sessionStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
-
-    updateResourceTable();
-  }
-
-  function toggleResourceElements() {
-    const isResourceToggleChecked = document.getElementById('resources_activated').checked;
-    document.getElementsByName('resource_setting').forEach(e => {
-      e.style.display = isResourceToggleChecked ? "block" : "none";
-    })
-  }
-
-  // Task specific Functions
-  function createTask() {
-    const task_name = document.getElementById('task_name').value;
-    const task_min_period = document.getElementById('task_min_period').value;
-    const task_deadline = document.getElementById('task_deadline').value;
-    const task_wcet = document.getElementById('task_wcet').value;
-
-    var tasks = JSON.parse(sessionStorage.getItem(TASKSET_KEY));
-
-    if (!tasks) {
-      tasks = [];
-    }
-
-    tasks.push({ name: task_name, min_period: task_min_period, deadline: task_deadline, wcet: task_wcet });
-    sessionStorage.setItem(TASKSET_KEY, JSON.stringify(tasks));
-
-    updateTaskTable();
-  }
-
-  function updateHiddenTaskFormField(tasks) {
-    const hidden_tasks_field = document.getElementById('tasks_hidden_input');
-    hidden_tasks_field.value = tasks;
-  }
-
-  function updateTaskTable() {
-    const task_table = document.getElementById('task_table');
-    const tasks = JSON.parse(sessionStorage.getItem(TASKSET_KEY));
-
-    updateHiddenTaskFormField(JSON.stringify(tasks));
-
-    task_table.innerHTML = "";
+  function populateTasksTable(table, sessionArray) {
     var header_row = task_table.insertRow(0);
 
     var header_cell_name = header_row.insertCell();
@@ -118,7 +129,7 @@
     header_cell_actions.innerHTML = "Actions";
 
     var i = 0;
-    tasks?.forEach(task => {
+    sessionArray?.forEach(task => {
       var row = task_table.insertRow(1);
 
       var cell_name = row.insertCell();
@@ -132,31 +143,21 @@
       cell_deadline.innerHTML = task.deadline;
       cell_wcet.innerHTML = task.wcet;
 
-      cell_actions.innerHTML = `<button onclick="deleteTask(${i})">remove task</button>`;
+      cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${TASKSET_KEY}')">remove task</button>`;
 
       i++;
     })
   }
 
-  function deleteTask(index) {
-    if (typeof index !== 'number' || isNaN(index)) {
-      console.error("No index provided, couldn't delete task: ", index);
-      return;
-    }
-
-    var tasks = JSON.parse(sessionStorage.getItem(TASKSET_KEY));
-    tasks.splice(index, 1);
-    sessionStorage.setItem(TASKSET_KEY, JSON.stringify(tasks));
-
-    updateTaskTable();
+  function toggleResourceElements() {
+    const isResourceToggleChecked = document.getElementById('resources_activated').checked;
+    document.getElementsByName('resource_setting').forEach(e => {
+      e.style.display = isResourceToggleChecked ? "block" : "none";
+    })
   }
 
-  window.addEventListener("storage", updateResourceTable);
-  window.addEventListener("storage", updateTaskTable);
-
-  window.addEventListener("DOMContentLoaded", updateResourceTable);
-  window.addEventListener("DOMContentLoaded", updateTaskTable);
-
+  window.addEventListener("DOMContentLoaded", updateTable(RESOURCE_KEY));
+  window.addEventListener("DOMContentLoaded", updateTable(TASKSET_KEY));
 </script>
 
 <style>
