@@ -8,6 +8,8 @@
     const resource_table = document.getElementById('resource_table');
     const resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
 
+    updateHiddenResourceFormField(JSON.stringify(resources));
+
     resource_table.innerHTML = "";
     var header_row = resource_table.insertRow(0);
 
@@ -43,6 +45,11 @@
     sessionStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
 
     updateResourceTable();
+  }
+
+  function updateHiddenResourceFormField(resources) {
+    const hidden_resource_field = document.getElementById('resources_hidden_input');
+    hidden_resource_field.value = resources;
   }
 
   function deleteResource(index) {
@@ -84,9 +91,16 @@
     updateTaskTable();
   }
 
+  function updateHiddenTaskFormField(tasks) {
+    const hidden_tasks_field = document.getElementById('tasks_hidden_input');
+    hidden_tasks_field.value = tasks;
+  }
+
   function updateTaskTable() {
     const task_table = document.getElementById('task_table');
     const tasks = JSON.parse(sessionStorage.getItem(TASKSET_KEY));
+
+    updateHiddenTaskFormField(JSON.stringify(tasks));
 
     task_table.innerHTML = "";
     var header_row = task_table.insertRow(0);
@@ -168,51 +182,56 @@
 <h2>Upload an existing Setup</h2>
 <input type="file">
 
-<h2>Settings</h2>
-<input type="checkbox" id="resources_activated" value="resources_activated" onchange="toggleResourceElements()" checked>
-<label for="resources_activated">Resources</label><br>
+<form method="post">
+  <h2>Settings</h2>
+  <input type="checkbox" id="resources_activated" name="resources_activated" value="True"
+    onchange="toggleResourceElements()" checked>
+  <label for="resources_activated">Resources</label><br>
 
-<div name="resource_setting">
-  <input type="radio" id="pip" name="resource_strat">
-  <label for="pip">Priority Inheritance Protocol</label><br>
+  <div name="resource_setting">
+    <input type="radio" id="pip" name="resource_strat" value="pip">
+    <label for="pip">Priority Inheritance Protocol</label><br>
 
-  <input type="radio" id="pcp" name="resource_strat">
-  <label for="pcp">Priority Ceiling Protocol</label><br>
+    <input type="radio" id="pcp" name="resource_strat" value="pcp">
+    <label for="pcp">Priority Ceiling Protocol</label><br>
 
-  <input type="radio" id="no" name="resource_strat">
-  <label for="no">No Deadlock-Avoidance Strategy</label><br>
-</div>
+    <input type="radio" id="none" name="resource_strat" value="none">
+    <label for="none">No Deadlock-Avoidance Strategy</label><br>
+  </div>
 
-<select>
-  <option>Earliest Deadline First (EDF)</option>
-  <option>Least Laxity First (LLF)</option>
-  <option>Modified Least Laxity First (MLLF)</option>
-  <option>Rate Monotonic Scheduling (RMS)</option>
-  <option>Fixed Priority Scheduling (FPS)</option>
-</select>
+  <label for="algorithms">Choose an algorithm:</label>
+  <select id="algorithms" name="algorithms">
+    <option value="edf" selected>Earliest Deadline First (EDF)</option>
+    <option value="llf">Least Laxity First (LLF)</option>
+    <option value="mllf">Modified Least Laxity First (MLLF)</option>
+    <option value="rms">Rate Monotonic Scheduling (RMS)</option>
+    <option value="fps">Fixed Priority Scheduling (FPS)</option>
+  </select>
 
-<div name="resource_setting">
-  <h2>Resources</h2>
-  <input type="text" id="resource_name" placeholder="Resource Name" />
-  <button onclick="createResource()">Add Resource</button>
+  <div name="resource_setting">
+    <h2>Resources</h2>
+    <input type="text" id="resource_name" placeholder="Resource Name" />
+    <button onclick="createResource()" type="button">Add Resource</button>
 
-  <table id="resource_table"></table>
-</div>
+    <table id="resource_table"></table>
+  </div>
 
-<h2>Taskset</h2>
-<input type="text" id="task_name" placeholder="Task Name" />
-<input type="number" id="task_min_period" placeholder="Minimal Period" />
-<input type="number" id="task_deadline" placeholder="Deadline" />
-<input type="number" id="task_wcet" placeholder="WCET" />
-<button onclick="createTask()">Add Task</button>
+  <h2>Taskset</h2>
+  <input type="text" id="task_name" placeholder="Task Name" />
+  <input type="number" id="task_min_period" placeholder="Minimal Period" />
+  <input type="number" id="task_deadline" placeholder="Deadline" />
+  <input type="number" id="task_wcet" placeholder="WCET" />
+  <button onclick="createTask()" type="button">Add Task</button>
 
-<table id="task_table"></table>
+  <table id="task_table"></table>
 
 
-<br>
-<br>
+  <br>
+  <br>
 
-<a href="{{ url_for('sim.result')}}">
-  <button>Run Simulation</button>
-</a>
+  <input id="resources_hidden_input" name="resources_hidden_input" type="hidden" value="">
+  <input id="tasks_hidden_input" name="tasks_hidden_input" type="hidden" value="">
+
+  <button type="submit">Run Simulation</button>
+</form>
 {% endblock %}
