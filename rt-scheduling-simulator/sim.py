@@ -3,6 +3,7 @@ from flask import (
 )
 import os
 import json
+import uuid
 
 bp = Blueprint('sim', __name__, url_prefix='/sim')
 
@@ -25,7 +26,7 @@ def create_sim_setup():
             os.makedirs(folder_path, exist_ok=True)
 
             # Define the file path for the JSON file
-            save_path = os.path.join(folder_path, 'received_data.json')
+            save_path = os.path.join(folder_path, f"rt-scheduling-simulator-setup_{uuid.uuid4()}.json")
             
             # Save the JSON data to the file
             with open(save_path, 'w') as json_file:
