@@ -10,7 +10,7 @@ bp = Blueprint('setups', __name__, url_prefix='/setups')
 @bp.route('/new', methods=['GET', 'POST'])
 def create_setup():
     if request.method == 'GET':
-        return render_template('/sim/create_setup.html')
+        return render_template('/sim/setup/create_setup.html')
     if request.method == 'POST':
         try:
             data = request.get_json()
