@@ -6,8 +6,8 @@ import json
 
 bp = Blueprint('sim', __name__, url_prefix='/sim')
 
-@bp.route('taskset', methods=['GET', 'POST'])
-def taskset():
+@bp.route('/setups/new', methods=['GET', 'POST'])
+def create_sim_setup():
     if request.method == 'GET':
         return render_template('/sim/create_setup.html')
     if request.method == 'POST':

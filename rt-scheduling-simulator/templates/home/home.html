@@ -1,25 +1,23 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Home{% endblock %}</h1>
+<h1>{% block title %}Home{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-    <p>
-        Welcome to the Real-Time Scheduling Simulator! This is my Bachelor's Thesis Project.
-        It is meant to help you understand and visualize RT-Scheduling Algorithms. 
-    </p>
+<p>
+    Welcome to the Real-Time Scheduling Simulator! This is my Bachelor's Thesis Project.
+    It is meant to help you understand and visualize RT-Scheduling Algorithms.
+</p>
 
-    <br>
+<br>
 
-    <a href="{{ url_for('sim.taskset') }}">
-        <button>Start a new Simulation</button>
-    </a>
+<a href="{{ url_for('sim.create_sim_setup') }}">
+    <button>Start a new Simulation</button>
+</a>
 
-    <br>
-    <br>
+<br>
+<br>
 
-    <button>Visualize past Results</button>
+<button>Visualize past Results</button>
 {% endblock %}
-
-
