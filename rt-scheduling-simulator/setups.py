@@ -5,10 +5,10 @@ import os
 import json
 import uuid
 
-bp = Blueprint('sim', __name__, url_prefix='/sim')
+bp = Blueprint('setups', __name__, url_prefix='/setups')
 
-@bp.route('/setups/new', methods=['GET', 'POST'])
-def create_sim_setup():
+@bp.route('/new', methods=['GET', 'POST'])
+def create_setup():
     if request.method == 'GET':
         return render_template('/sim/create_setup.html')
     if request.method == 'POST':
@@ -37,8 +37,3 @@ def create_sim_setup():
         except Exception as e:
             #TODO add error handling
             return jsonify({'error': str(e)}), 500
-
-@bp.route('result', methods=['GET'])
-def result():
-    if request.method == 'GET':
-        return render_template('/sim/result.html')

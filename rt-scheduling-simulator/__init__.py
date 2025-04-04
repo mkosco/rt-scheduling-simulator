@@ -22,7 +22,7 @@ def create_app(test_config=None):
     from . import home
     app.register_blueprint(home.bp)
 
-    from . import sim
-    app.register_blueprint(sim.bp)
+    from . import setups
+    app.register_blueprint(setups.bp)
 
     return app
