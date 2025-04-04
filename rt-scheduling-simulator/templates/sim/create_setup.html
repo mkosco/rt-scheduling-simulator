@@ -177,7 +177,7 @@
     const formData = collectFormData();
 
     try {
-      const response = await fetch('/sim/taskset', {
+      const response = await fetch('/sim/setups/new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -222,9 +222,6 @@
 {% endblock %}
 
 {% block content %}
-<h2>Upload an existing Setup</h2>
-<input type="file">
-
 <form method="post">
   <h2>Settings</h2>
   <input type="checkbox" id="resources_activated" name="resources_activated" value="True"

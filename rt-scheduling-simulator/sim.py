@@ -9,7 +9,7 @@ bp = Blueprint('sim', __name__, url_prefix='/sim')
 @bp.route('taskset', methods=['GET', 'POST'])
 def taskset():
     if request.method == 'GET':
-        return render_template('/sim/setup.html')
+        return render_template('/sim/create_setup.html')
     if request.method == 'POST':
         try:
             data = request.get_json()
