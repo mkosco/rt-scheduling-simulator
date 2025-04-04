@@ -1,11 +1,15 @@
 from flask import Flask
 
+UPLOAD_FOLDER = '/rt-scheduling-simulator/sim_setup_files'
+ALLOWED_EXTENSIONS = {'json'}
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
+        UPLOAD_FOLDER=UPLOAD_FOLDER,
+        ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
     )
 
     if test_config is None:
