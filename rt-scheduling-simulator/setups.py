@@ -7,6 +7,13 @@ import uuid
 
 bp = Blueprint('setups', __name__, url_prefix='/setups')
 
+
+@bp.route('/', methods=['GET', 'POST'])
+def list_setups():
+    if request.method == 'GET':
+        return render_template('/sim/setup/list_setups.html')
+
+
 @bp.route('/new', methods=['GET', 'POST'])
 def create_setup():
     if request.method == 'GET':
