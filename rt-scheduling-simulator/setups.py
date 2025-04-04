@@ -23,8 +23,9 @@ def create_setup():
             data = request.get_json()
 
             if not data:
-                flash('No JSON data was recieved!')
+                # https://flask.palletsprojects.com/en/stable/patterns/flashing/#flashing-with-categories
                 #TODO add error handling
+                flash('No JSON data was recieved!')
 
             # Define the folder path for storing JSON files
             folder_path = os.path.join(os.getcwd(), 'rt-scheduling-simulator/sim_setup_files')
