@@ -156,6 +156,48 @@
     })
   }
 
+  function collectFormData() {
+    const resourcesActivated = document.getElementById('resources_activated').checked;
+    const algorithm = document.getElementById('algorithms').value;
+
+    const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
+    const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
+
+    const formData = {
+      resources_activated: resourcesActivated,
+      algorithm: algorithm,
+      resources: resources,
+      tasks: tasks
+    };
+
+    return formData;
+  }
+
+  async function sendFormData() {
+    const formData = collectFormData();
+
+    try {
+      const response = await fetch('/sim/taskset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        const result = await response.text();
+        document.body.innerHTML = result; // Replace the page content with the result
+      } else {
+        console.error('Error:', response.statusText);
+        alert('Failed to send data to the server.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while sending data to the server.');
+    }
+  }
+
   window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
   window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
 </script>
@@ -230,9 +272,6 @@
   <br>
   <br>
 
-  <input id="resources_hidden_input" name="resources_hidden_input" type="hidden" value="">
-  <input id="tasks_hidden_input" name="tasks_hidden_input" type="hidden" value="">
-
-  <button type="submit">Run Simulation</button>
+  <button type="button" onclick="sendFormData()">Run Simulation</button>
 </form>
 {% endblock %}
