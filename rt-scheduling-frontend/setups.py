@@ -1,9 +1,10 @@
 from flask import (
-    Blueprint, render_template, request, jsonify, flash
+    Blueprint, render_template, request, jsonify, flash, current_app
 )
 import os
 import json
 import uuid
+import subprocess
 
 bp = Blueprint('setups', __name__, url_prefix='/setups')
 
@@ -43,6 +44,25 @@ def create_setup():
             with open(save_path, 'w') as json_file:
                 json.dump(data, json_file, indent=4)
 
+            # Call the simulation_runner.py script as a subprocess
+            simulation_script_path = os.path.join(os.getcwd(), 'rt-scheduling-simulator/simulation_runner.py')
+            current_app.logger.debug(f"folder path of the simulation runner script: {simulation_script_path}")
+
+            result = subprocess.run(
+                ['python', simulation_script_path, save_path],
+                capture_output=True,
+                text=True
+            )
+
+            # Check the result of the subprocess
+            if result.returncode != 0:
+                current_app.logger.error(f"simulation runner failed: {result.stderr}")
+                flash(f"Simulation failed, check log")
+            else:
+                current_app.logger.debug(f"simulation subprocess: {result.stdout}")
+                flash("Simulation ran successfully!")
+
+                
             return render_template('/sim/result.html')
 
         except Exception as e:
