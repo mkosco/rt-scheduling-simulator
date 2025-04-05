@@ -1,5 +1,10 @@
+import os
 import sys
 import json
+import math
+import uuid
+
+MAX_SIMULATION_TIME = 10000
 
 if len(sys.argv) != 2:
     print("Usage: python simulation_runner.py <filename>")
@@ -12,10 +17,37 @@ print(f"Simulation called with argument: {argument}")
 try:
     with open(argument, 'r') as file:
         data = json.load(file)
-        print("JSON content successfully loaded:")
-        print(data)
+        print(f"JSON content successfully loaded: {data}")
 
-        # find timepoint where all possible combinations have been found: Timepoint = max(Start_A, Start_B, Start_C) + LCM(Period_A, Period_B, Period_C)
+        task_starting_points: list[int] = [int(task["start"]) for task in data["tasks"]]
+        print(f"aggregated task starting points: {task_starting_points}")
+
+        task_periods: list[int] = [int(task["min_period"]) for task in data["tasks"]]
+        print(f"aggregated task periods: {task_periods}")
+
+        max_timepoint = min(max(task_starting_points) + math.lcm(*task_periods), MAX_SIMULATION_TIME)
+        print(f"max simulation timepoint: {max_timepoint}")
+
+        # create simulation result file
+        folder_path = os.path.join(os.getcwd(), 'data/sim_result_files')
+        print(f"folder path for sim result file storage: {folder_path}")
+        
+        # Ensure the folder exists
+        os.makedirs(folder_path, exist_ok=True)
+
+        # Define the file path for the JSON file
+        save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{uuid.uuid4()}.json")
+        print(f"folder path for the created sim result file: {save_path}")
+
+        # Save the JSON data to the file
+        with open(save_path, 'w') as json_file:
+            data["result"] = {"timeline": []}
+
+            # main simulation loop
+            for i in range(max_timepoint):
+                data["result"]["timeline"].append({"time": i})
+
+            json.dump(data, json_file, indent=4)
 
 except FileNotFoundError:
     print(f"Error: File '{argument}' not found.")
