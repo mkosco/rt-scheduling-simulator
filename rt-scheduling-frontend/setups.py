@@ -28,7 +28,7 @@ def create_setup():
                 flash('No JSON data was recieved!')
 
             # Define the folder path for storing JSON files
-            folder_path = os.path.join(os.getcwd(), 'rt-scheduling-simulator/sim_setup_files')
+            folder_path = os.path.join(os.getcwd(), 'data/sim_setup_files')
             
             # Ensure the folder exists
             os.makedirs(folder_path, exist_ok=True)
