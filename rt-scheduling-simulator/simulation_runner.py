@@ -45,10 +45,7 @@ try:
 
             # main simulation loop
             for i in range(max_timepoint):
-<<<<<<< HEAD
                 # TODO perform edf algorithm
-=======
->>>>>>> f9392727fbdb729fb77fd1700168eb5e727cbc37
                 data["result"]["timeline"].append({"time": i})
 
             json.dump(data, json_file, indent=4)
