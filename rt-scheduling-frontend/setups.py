@@ -21,6 +21,7 @@ def create_setup():
     if request.method == 'POST':
         try:
             data = request.get_json()
+            current_app.logger.debug(f"setup creation request data: {data}")
 
             if not data:
                 # https://flask.palletsprojects.com/en/stable/patterns/flashing/#flashing-with-categories
@@ -29,13 +30,15 @@ def create_setup():
 
             # Define the folder path for storing JSON files
             folder_path = os.path.join(os.getcwd(), 'data/sim_setup_files')
+            current_app.logger.debug(f"folder path for sim setup file storage: {folder_path}")
             
             # Ensure the folder exists
             os.makedirs(folder_path, exist_ok=True)
 
             # Define the file path for the JSON file
             save_path = os.path.join(folder_path, f"rt-scheduling-simulator-setup_{uuid.uuid4()}.json")
-            
+            current_app.logger.debug(f"folder path for the created sim setup file: {save_path}")
+
             # Save the JSON data to the file
             with open(save_path, 'w') as json_file:
                 json.dump(data, json_file, indent=4)
