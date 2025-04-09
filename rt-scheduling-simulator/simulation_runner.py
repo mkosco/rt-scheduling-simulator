@@ -3,6 +3,7 @@ import sys
 import json
 import math
 import uuid
+from algorithms.edf import EDF
 
 MAX_SIMULATION_TIME = 10000
 
@@ -39,6 +40,8 @@ try:
         save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{uuid.uuid4()}.json")
         print(f"folder path for the created sim result file: {save_path}")
 
+        algorithm = EDF()
+
         # Save the JSON data to the file
         with open(save_path, 'w') as json_file:
             data["result"] = {"timeline": []}
@@ -46,6 +49,9 @@ try:
             # main simulation loop
             for i in range(max_timepoint):
                 # TODO perform edf algorithm
+                
+                algorithm.calculate()
+
                 data["result"]["timeline"].append({"time": i})
 
             json.dump(data, json_file, indent=4)
