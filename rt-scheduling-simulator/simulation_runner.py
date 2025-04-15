@@ -18,12 +18,15 @@ print(f"Simulation called with argument: {argument}")
 try:
     with open(argument, 'r') as file:
         data = json.load(file)
+        tasks = data["tasks"]
+        resources = data["resources"]
+
         print(f"JSON content successfully loaded: {data}")
 
-        task_starting_points: list[int] = [int(task["start"]) for task in data["tasks"]]
+        task_starting_points: list[int] = [int(task["start"]) for task in tasks]
         print(f"aggregated task starting points: {task_starting_points}")
 
-        task_periods: list[int] = [int(task["min_period"]) for task in data["tasks"]]
+        task_periods: list[int] = [int(task["min_period"]) for task in tasks]
         print(f"aggregated task periods: {task_periods}")
 
         max_timepoint = min(max(task_starting_points) + math.lcm(*task_periods), MAX_SIMULATION_TIME)
