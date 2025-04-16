@@ -26,9 +26,10 @@ try:
         task_starting_points: list[int] = [int(task["start"]) for task in tasks]
         print(f"aggregated task starting points: {task_starting_points}")
 
-        task_periods: list[int] = [int(task["min_period"]) for task in tasks]
+        task_periods: list[int] = [int(task["period"]) for task in tasks]
         print(f"aggregated task periods: {task_periods}")
 
+        # TODO check whether this is correct
         max_timepoint = min(max(task_starting_points) + math.lcm(*task_periods), MAX_SIMULATION_TIME)
         print(f"max simulation timepoint: {max_timepoint}")
 
@@ -43,7 +44,7 @@ try:
         save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{uuid.uuid4()}.json")
         print(f"folder path for the created sim result file: {save_path}")
 
-        algorithm = EDF(tasks, resources)
+        algorithm = EDF(tasks, resources, max_timepoint)
 
         algorithm.summarize()
 
