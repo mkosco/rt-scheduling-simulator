@@ -2,7 +2,10 @@ from .algorithm import Algorithm
 
 class EDF(Algorithm):
     def calculate(self):
-        return super().calculate()
+        print("\n performing EDF: \n")
+        for i in range(self.max_timepoint):
+            self.update_active_jobs(i)
+            print(f"timepoint: {i}, active jobs: {self.active_jobs}")
     
     def summarize(self):
         print(f"\nEDF")

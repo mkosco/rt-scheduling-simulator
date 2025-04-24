@@ -52,13 +52,7 @@ try:
         with open(save_path, 'w') as json_file:
             data["result"] = {"timeline": []}
 
-            # main simulation loop
-            for i in range(max_timepoint):
-                # TODO perform edf algorithm
-                
-                algorithm.calculate()
-
-                data["result"]["timeline"].append({"time": i})
+            algorithm.calculate()
 
             json.dump(data, json_file, indent=4)
 
