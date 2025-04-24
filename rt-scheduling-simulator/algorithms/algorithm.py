@@ -5,7 +5,8 @@ class Algorithm(ABC):
         self.tasks = tasks
         self.resources = resources
         self.max_timepoint = max_timepoint
-        self.generate_jobs()
+        self.jobs = self.generate_jobs()
+        self.active_jobs = []
 
     @abstractmethod
     def calculate(self) -> None:
@@ -16,11 +17,12 @@ class Algorithm(ABC):
     def summarize(self) -> None:
         """This function prints a sumary of the algorithm and it's initialization"""
         print(f"tasks: {self.tasks}")
+        print(f"jobs: {self.jobs}")
         print(f"resources: {self.resources}")
         print(f"max timepoint: {self.max_timepoint} \n")
         pass
 
-    def generate_jobs(self) -> None:
+    def generate_jobs(self) -> list:
         "This function is used to generate the joblist for the considered timeframe from the task list"
         jobs = []
 
@@ -40,4 +42,18 @@ class Algorithm(ABC):
                 jobs.append({"name": f"{task_name}_j{i}", "arrival_time": (start + i * period), "execution_requirement": wcet, "deadline": (start + i * period + deadline)})
 
         print(f"\njobs for taskset: {jobs}\n")
+        return jobs
+    
+    def update_active_jobs(self, current_time) -> None:
+        """ 
+        A job is active when:
+            1: arrival time <= current time
+            2: current time <= deadline
+            3: the execution requirement was not fulfilled yet
+        """
+        
+        for job in self.jobs:
+            if job["arrival_time"] <= current_time and current_time <= job["deadline"] and job["execution_requirement"] > 0 and job not in self.active_jobs:
+                self.active_jobs.append(job)
+
         pass
