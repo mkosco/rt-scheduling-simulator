@@ -53,8 +53,10 @@ class Algorithm(ABC):
             3: the execution requirement was not fulfilled yet
         """
         
+        # append currently active jobs
         for job in self.jobs:
             if job.arrival_time <= current_time and current_time <= job.deadline and job.execution_requirement > 0 and job not in self.active_jobs:
                 self.active_jobs.append(job)
 
+        # TODO remove jobs that are no longer active
         pass
