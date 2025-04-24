@@ -25,18 +25,19 @@ class Algorithm(ABC):
         jobs = []
 
         for task in self.tasks:
-            print(f"creating jobs for task: {task}")
+            print(f"\ncreating jobs for task: {task}")
             period = int(task["period"])
+            task_name = task["name"]
             wcet = int(task["wcet"])
             start = int(task["start"])
             deadline = int(task["deadline"])
 
             # TODO check behaviour if division is not round
             num_jobs = int(self.max_timepoint / period)
-            print(num_jobs)
+            print(f"number of jobs for task: {num_jobs}")
             
             for i in range(num_jobs):
-                jobs.append({"arrival_time": (start + i * period), "execution_requirement": wcet, "deadline": (start + i * period + deadline)})
+                jobs.append({"name": f"{task_name}_j{i}", "arrival_time": (start + i * period), "execution_requirement": wcet, "deadline": (start + i * period + deadline)})
 
-            print(jobs)
+        print(f"\njobs for taskset: {jobs}\n")
         pass
