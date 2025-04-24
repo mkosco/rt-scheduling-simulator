@@ -3,7 +3,7 @@ from model.job import Job
 from model.task import Task 
 
 class Algorithm(ABC):
-    def __init__(self, tasks, resources, max_timepoint):
+    def __init__(self, tasks: list[Task], resources, max_timepoint):
         self.tasks = tasks
         self.resources = resources
         self.max_timepoint = max_timepoint
@@ -34,18 +34,13 @@ class Algorithm(ABC):
 
         for task in self.tasks:
             print(f"\ncreating jobs for task: {task}")
-            period = int(task["period"])
-            task_name = task["name"]
-            wcet = int(task["wcet"])
-            start = int(task["start"])
-            deadline = int(task["deadline"])
 
             # TODO check behaviour if division is not round
-            num_jobs = int(self.max_timepoint / period)
+            num_jobs = int(self.max_timepoint / task.period)
             print(f"number of jobs for task: {num_jobs}")
             
             for i in range(num_jobs):
-                jobs.append(Job(name=f"{task_name}_j{i}",arrival_time=(start + i * period),execution_requirement=wcet,deadline=(start + i * period + deadline)))
+                jobs.append(Job(name=f"{task.name}_j{i}",arrival_time=(task.start + i * task.period),execution_requirement=task.wcet,deadline=(task.start + i * task.period + task.relative_deadline)))
 
         print(f"\njobs for taskset: {jobs}\n")
         return jobs

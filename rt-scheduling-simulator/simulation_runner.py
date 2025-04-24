@@ -4,6 +4,7 @@ import json
 import math
 import uuid
 from algorithms.edf import EDF
+from model.task import Task
 
 MAX_SIMULATION_TIME = 10000
 
@@ -18,15 +19,22 @@ print(f"Simulation called with argument: {argument}")
 try:
     with open(argument, 'r') as file:
         data = json.load(file)
-        tasks = data["tasks"]
+        raw_tasks = data["tasks"]
+        tasks: list[Task] = []
         resources = data["resources"]
+
+        # parse raw dict tasks into task dataclass
+        for task in raw_tasks: 
+            tasks.append(Task(name=task["name"],start=int(task["start"]),wcet=int(task["wcet"]),period=int(task["period"]),relative_deadline=int(task["deadline"])))
+
+        # TODO parse raw resources into resource dataclass
 
         print(f"JSON content successfully loaded: {data}")
 
-        task_starting_points: list[int] = [int(task["start"]) for task in tasks]
+        task_starting_points: list[int] = [task.start for task in tasks]
         print(f"aggregated task starting points: {task_starting_points}")
 
-        task_periods: list[int] = [int(task["period"]) for task in tasks]
+        task_periods: list[int] = [task.period for task in tasks]
         print(f"aggregated task periods: {task_periods}")
 
         # TODO check whether this is correct

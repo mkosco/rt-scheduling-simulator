@@ -11,3 +11,6 @@ class EDF(Algorithm):
         print(f"\nEDF")
         super().summarize()
         pass
+
+    def pick_next_job(self):
+        return super().pick_next_job()
