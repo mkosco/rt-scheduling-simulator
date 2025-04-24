@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from model.job import Job
+from model.task import Task 
 
 class Algorithm(ABC):
     def __init__(self, tasks, resources, max_timepoint):
@@ -22,7 +24,11 @@ class Algorithm(ABC):
         print(f"max timepoint: {self.max_timepoint} \n")
         pass
 
-    def generate_jobs(self) -> list:
+    @abstractmethod
+    def pick_next_job(self) -> Job:
+        pass
+
+    def generate_jobs(self) -> list[Job]:
         "This function is used to generate the joblist for the considered timeframe from the task list"
         jobs = []
 
@@ -39,7 +45,7 @@ class Algorithm(ABC):
             print(f"number of jobs for task: {num_jobs}")
             
             for i in range(num_jobs):
-                jobs.append({"name": f"{task_name}_j{i}", "arrival_time": (start + i * period), "execution_requirement": wcet, "deadline": (start + i * period + deadline)})
+                jobs.append(Job(name=f"{task_name}_j{i}",arrival_time=(start + i * period),execution_requirement=wcet,deadline=(start + i * period + deadline)))
 
         print(f"\njobs for taskset: {jobs}\n")
         return jobs
@@ -53,7 +59,7 @@ class Algorithm(ABC):
         """
         
         for job in self.jobs:
-            if job["arrival_time"] <= current_time and current_time <= job["deadline"] and job["execution_requirement"] > 0 and job not in self.active_jobs:
+            if job.arrival_time <= current_time and current_time <= job.deadline and job.execution_requirement > 0 and job not in self.active_jobs:
                 self.active_jobs.append(job)
 
         pass
