@@ -44,12 +44,13 @@ def create_setup():
             with open(save_path, 'w') as json_file:
                 json.dump(data, json_file, indent=4)
 
-            # Call the simulation_runner.py script as a subprocess
-            simulation_script_path = os.path.join(os.getcwd(), 'rt-scheduling-simulator/simulation_runner.py')
-            current_app.logger.debug(f"folder path of the simulation runner script: {simulation_script_path}")
-
+            simulation_package = 'rt-scheduling-simulator.simulation_runner'
+            project_root = os.path.dirname(os.path.abspath("rt-scheduling-simulator"))  # Set to the root of the project
+            print(f"project root: {project_root}")
+            
             result = subprocess.run(
-                ['python', simulation_script_path, save_path],
+                ['python', '-m', simulation_package, save_path],
+                cwd=project_root,
                 capture_output=True,
                 text=True
             )
