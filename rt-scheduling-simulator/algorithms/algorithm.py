@@ -8,7 +8,7 @@ class Algorithm(ABC):
         self.resources = resources
         self.max_timepoint = max_timepoint
         self.jobs = self.generate_jobs()
-        self.active_jobs = []
+        self.active_jobs: list[Job] = []
 
     @abstractmethod
     def calculate(self) -> None:
