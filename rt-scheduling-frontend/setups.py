@@ -44,7 +44,7 @@ def create_setup():
             with open(save_path, 'w') as json_file:
                 json.dump(data, json_file, indent=4)
 
-            simulation_package = 'rt-scheduling-simulator.simulation_runner'
+            simulation_package = 'rt_scheduling_simulator.simulation_runner'
             project_root = os.path.dirname(os.path.abspath("rt-scheduling-simulator"))  # Set to the root of the project
             print(f"project root: {project_root}")
             
