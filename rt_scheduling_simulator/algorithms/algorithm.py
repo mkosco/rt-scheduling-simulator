@@ -63,8 +63,9 @@ class Algorithm(ABC):
         
         # append currently active jobs
         for job in self.jobs:
-            if job.arrival_time <= current_time and current_time <= job.deadline and job.execution_requirement > 0 and job not in self.active_jobs:
-                self.active_jobs.append(job)
+            job_is_active = job.arrival_time <= current_time and current_time <= job.deadline and job.execution_requirement > 0
 
-        # TODO remove jobs that are no longer active
-        pass
+            if job_is_active and job not in self.active_jobs:
+                self.active_jobs.append(job)
+            elif not job_is_active and job in self.active_jobs:
+                self.active_jobs.remove(job) 
