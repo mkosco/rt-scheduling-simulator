@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from pprint import pprint
-from rt_scheduling_simulator.model.job import Job
+from dataclasses import asdict
+from rt_scheduling_simulator.model.job import Job, JobState
 from rt_scheduling_simulator.model.task import Task 
 
 class Algorithm(ABC):
@@ -10,18 +11,7 @@ class Algorithm(ABC):
         self.max_timepoint = max_timepoint
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
-
-    @abstractmethod
-    def calculate(self) -> None:
-        """This function performs the algorithm calculation"""
-        for i in range(self.max_timepoint):
-            self.update_active_jobs(i)
-
-            picked_job = self.pick_next_job()
-
-            print(f"timepoint: {i}, active jobs:")
-            pprint(self.active_jobs)
-            print(f"picked job: {picked_job}")
+        self.result = []
     
     @abstractmethod
     def summarize(self) -> None:
@@ -36,6 +26,28 @@ class Algorithm(ABC):
     def pick_next_job(self) -> Job:
         pass
 
+    def calculate(self) -> list:
+        """This function performs the algorithm calculation"""
+        i = 0
+        while True:
+            self.update_active_jobs(i)
+            
+            if not self.active_jobs:
+                return self.result
+            
+            print(f"timepoint: {i}, active jobs:")
+            pprint(self.active_jobs)
+
+            picked_job = self.pick_next_job()
+
+            active_job_copy = list(map(asdict, self.active_jobs))
+            
+            self.result.append({'timepoint' : i, 'active_jobs' : active_job_copy})
+            print(f"picked job: {picked_job}")
+
+            picked_job.execution_requirement -= 1
+            i += 1
+
     def generate_jobs(self) -> list[Job]:
         "This function is used to generate the joblist for the considered timeframe from the task list"
         jobs = []
@@ -48,7 +60,11 @@ class Algorithm(ABC):
             print(f"number of jobs for task: {num_jobs}")
             
             for i in range(num_jobs):
-                jobs.append(Job(name=f"{task.name}_j{i}",arrival_time=(task.start + i * task.period),execution_requirement=task.wcet,deadline=(task.start + i * task.period + task.relative_deadline)))
+                jobs.append(Job(name=f"{task.name}_j{i}",
+                                arrival_time=(task.start + i * task.period),
+                                execution_requirement=task.wcet,
+                                deadline=(task.start + i * task.period + task.relative_deadline),
+                                state=JobState.INACTIVE))
 
         print(f"\njobs for taskset:\n")
         pprint(jobs)
@@ -56,17 +72,23 @@ class Algorithm(ABC):
     
     def update_active_jobs(self, current_time) -> None:
         """ 
+        This function updates the list of currently active jobs, this list is used in algorithm calculation.\n
         A job is active when:
             1: arrival time <= current time
             2: current time <= deadline
             3: the execution requirement was not fulfilled yet
         """
         
-        # append currently active jobs
         for job in self.jobs:
+            job.state = JobState.WAITING
             job_is_active = job.arrival_time <= current_time and current_time <= job.deadline and job.execution_requirement > 0
 
             if job_is_active and job not in self.active_jobs:
+                job.state = JobState.WAITING
                 self.active_jobs.append(job)
             elif not job_is_active and job in self.active_jobs:
+                if job.execution_requirement > 0:
+                    job.state = JobState.MISSED
+                    print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
+                job.state = JobState.FINNISHED
                 self.active_jobs.remove(job) 

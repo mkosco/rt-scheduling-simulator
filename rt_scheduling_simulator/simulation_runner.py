@@ -58,9 +58,7 @@ try:
 
         # Save the JSON data to the file
         with open(save_path, 'w') as json_file:
-            data["result"] = {"timeline": []}
-
-            algorithm.calculate()
+            data["result"] = algorithm.calculate()
 
             json.dump(data, json_file, indent=4)
 

@@ -1,12 +1,8 @@
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
-from rt_scheduling_simulator.model.job import Job
+from rt_scheduling_simulator.model.job import Job, JobState
 import random
 
 class EDF(Algorithm):
-    def calculate(self):
-        print("\n performing EDF: \n")
-        super().calculate()
-
     def summarize(self):
         print(f"\nEDF")
         super().summarize()
@@ -20,4 +16,5 @@ class EDF(Algorithm):
             if job.deadline < next_job.deadline:
                 next_job = job
 
+        next_job.state = JobState.EXECUTING
         return next_job
