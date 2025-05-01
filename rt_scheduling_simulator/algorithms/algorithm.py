@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from model.job import Job
-from model.task import Task 
+from rt_scheduling_simulator.model.job import Job
+from rt_scheduling_simulator.model.task import Task 
 
 class Algorithm(ABC):
     def __init__(self, tasks: list[Task], resources, max_timepoint):

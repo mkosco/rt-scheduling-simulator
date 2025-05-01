@@ -3,8 +3,8 @@ import sys
 import json
 import math
 import uuid
-from algorithms.edf import EDF
-from model.task import Task
+from rt_scheduling_simulator.algorithms.edf import EDF
+from rt_scheduling_simulator.model.task import Task
 
 MAX_SIMULATION_TIME = 10000
 

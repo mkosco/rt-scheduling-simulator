@@ -1,5 +1,5 @@
-from algorithms import Algorithm
-from model.job import Job 
+from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
+from rt_scheduling_simulator.model.job import Job 
 
 class EDF(Algorithm):
     def calculate(self):
