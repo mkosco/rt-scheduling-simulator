@@ -27,10 +27,10 @@ class Algorithm(ABC):
     def summarize(self) -> None:
         """This function prints a sumary of the algorithm and it's initialization"""
         print(f"tasks: {self.tasks}")
-        print(f"jobs: {self.jobs}")
+        print(f"jobs: ")
+        pprint(self.jobs)
         print(f"resources: {self.resources}")
         print(f"max timepoint: {self.max_timepoint} \n")
-        pass
 
     @abstractmethod
     def pick_next_job(self) -> Job:
@@ -50,7 +50,8 @@ class Algorithm(ABC):
             for i in range(num_jobs):
                 jobs.append(Job(name=f"{task.name}_j{i}",arrival_time=(task.start + i * task.period),execution_requirement=task.wcet,deadline=(task.start + i * task.period + task.relative_deadline)))
 
-        print(f"\njobs for taskset: {jobs}\n")
+        print(f"\njobs for taskset:\n")
+        pprint(jobs)
         return jobs
     
     def update_active_jobs(self, current_time) -> None:
