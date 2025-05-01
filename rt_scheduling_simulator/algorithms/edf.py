@@ -5,13 +5,8 @@ import random
 class EDF(Algorithm):
     def calculate(self):
         print("\n performing EDF: \n")
-        for i in range(self.max_timepoint):
-            self.update_active_jobs(i)
+        super().calculate()
 
-            picked_job = self.pick_next_job()
-
-            print(f"timepoint: {i}, active jobs: {self.active_jobs}, picked job: {picked_job}")
-    
     def summarize(self):
         print(f"\nEDF")
         super().summarize()

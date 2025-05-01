@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pprint import pprint
 from rt_scheduling_simulator.model.job import Job
 from rt_scheduling_simulator.model.task import Task 
 
@@ -13,7 +14,14 @@ class Algorithm(ABC):
     @abstractmethod
     def calculate(self) -> None:
         """This function performs the algorithm calculation"""
-        pass
+        for i in range(self.max_timepoint):
+            self.update_active_jobs(i)
+
+            picked_job = self.pick_next_job()
+
+            print(f"timepoint: {i}, active jobs:")
+            pprint(self.active_jobs)
+            print(f"picked job: {picked_job}")
     
     @abstractmethod
     def summarize(self) -> None:
