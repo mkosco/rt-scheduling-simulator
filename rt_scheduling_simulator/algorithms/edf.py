@@ -1,5 +1,6 @@
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
-from rt_scheduling_simulator.model.job import Job 
+from rt_scheduling_simulator.model.job import Job
+import random
 
 class EDF(Algorithm):
     def calculate(self):
@@ -18,7 +19,7 @@ class EDF(Algorithm):
 
     """ This is EDF so we pick the job with the smallest (earliest) deadline """
     def pick_next_job(self):
-        next_job: Job = self.active_jobs.pop() # initialize arbitrarily
+        next_job: Job = random.choice(self.active_jobs) # initialize arbitrarily
 
         for job in self.active_jobs:
             if job.deadline < next_job.deadline:
