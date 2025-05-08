@@ -53,9 +53,20 @@ class Algorithm(ABC):
     def generate_jobs(self) -> list[Job]:
         "This function is used to generate the joblist for the considered timeframe from the task list"
         jobs = []
+        
+        # TODO this isn't very nice as all the jobs get rms priorities, even when not using rms
+        
+        # sort according to smallest period
+        self.tasks.sort(key=lambda task: task.period)
+        rms_priority = 1
+        prev_period = self.tasks[0].period
 
         for task in self.tasks:
             print(f"\ncreating jobs for task: {task}")
+
+            # one is the highest priority
+            if task.period > prev_period:
+                rms_priority += 1
 
             # TODO check behaviour if division is not round
             num_jobs = int(self.max_timepoint / task.period)
@@ -68,7 +79,8 @@ class Algorithm(ABC):
                                 deadline=(task.start + i * task.period + task.relative_deadline),
                                 state=JobState.INACTIVE,
                                 laxity=None,
-                                priority=task.priority))
+                                fps_priority=task.fps_priority,
+                                rms_priority=rms_priority))
 
         print(f"\njobs for taskset:\n")
         pprint(jobs)

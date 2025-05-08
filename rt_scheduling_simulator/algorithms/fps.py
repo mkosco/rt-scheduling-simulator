@@ -14,7 +14,7 @@ class FPS(Algorithm):
         One is the highets priority, higher integers mean a lower priority
     """
     def pick_next_job(self):
-        next_job = min(self.active_jobs, key=lambda j: j.priority)
+        next_job = min(self.active_jobs, key=lambda j: j.fps_priority)
         
         # TODO can two task have the same priority?
         

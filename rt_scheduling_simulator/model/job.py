@@ -17,4 +17,5 @@ class Job:
     deadline: int
     state: JobState
     laxity: Optional[int]
-    priority: Optional[int]
+    fps_priority: Optional[int]
+    rms_priority: Optional[int]
