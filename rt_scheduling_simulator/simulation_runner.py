@@ -49,7 +49,7 @@ def main():
             # parse raw dict tasks into task dataclass
             for task in raw_tasks: 
                 # TODO set fps priority
-                tasks.append(Task(name=task["name"],start=int(task["start"]),wcet=int(task["wcet"]),period=int(task["period"]),relative_deadline=int(task["deadline"]), fps_priority=0))
+                tasks.append(Task(name=task["name"],start=int(task["start"]),wcet=int(task["wcet"]),period=int(task["period"]),relative_deadline=int(task["deadline"]), fps_priority=int(task["fps_priority"])))
 
             # TODO parse raw resources into resource dataclass
 
