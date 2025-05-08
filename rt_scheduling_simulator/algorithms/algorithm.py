@@ -67,7 +67,8 @@ class Algorithm(ABC):
                                 execution_requirement=task.wcet,
                                 deadline=(task.start + i * task.period + task.relative_deadline),
                                 state=JobState.INACTIVE,
-                                laxity=None))
+                                laxity=None,
+                                priority=task.priority))
 
         print(f"\njobs for taskset:\n")
         pprint(jobs)
