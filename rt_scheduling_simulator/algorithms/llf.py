@@ -15,6 +15,9 @@ class LLF(Algorithm):
         self.update_laxity()
         min_laxity_jobs: list[Job] = min(self.active_jobs, key=lambda j: j.laxity)
                 
+        # TODO test what happens when two jobs have the same laxity
+        # TODO set jobstate correctly
+        
         return min_laxity_jobs
     
     # Survey of Real Time Scheduling Algorithms
