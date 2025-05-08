@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 class JobState(str, Enum):
     INACTIVE = "inactive"
@@ -15,3 +16,4 @@ class Job:
     execution_requirement: int
     deadline: int
     state: JobState
+    laxity: Optional[int]

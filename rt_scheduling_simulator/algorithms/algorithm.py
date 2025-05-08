@@ -12,6 +12,7 @@ class Algorithm(ABC):
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
         self.result = []
+        self.current_time = 0
     
     @abstractmethod
     def summarize(self) -> None:
@@ -30,6 +31,7 @@ class Algorithm(ABC):
         """This function performs the algorithm calculation"""
         i = 0
         while True:
+            self.current_time = i
             self.update_active_jobs(i)
             
             if not self.active_jobs:
@@ -60,11 +62,12 @@ class Algorithm(ABC):
             print(f"number of jobs for task: {num_jobs}")
             
             for i in range(num_jobs):
-                jobs.append(Job(name=f"{task.name}_j{i}",
+                jobs.append(Job(name=f"{task.name.strip()}_j{i}",
                                 arrival_time=(task.start + i * task.period),
                                 execution_requirement=task.wcet,
                                 deadline=(task.start + i * task.period + task.relative_deadline),
-                                state=JobState.INACTIVE))
+                                state=JobState.INACTIVE,
+                                laxity=None))
 
         print(f"\njobs for taskset:\n")
         pprint(jobs)

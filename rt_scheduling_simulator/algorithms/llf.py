@@ -3,18 +3,22 @@ from rt_scheduling_simulator.model.job import Job, JobState
 import random
 
 class LLF(Algorithm):
+    laxity = {}
+    
     def summarize(self):
         print(f"\nLLF")
         super().summarize()
         pass
 
-    """ This is EDF so we pick the job with the smallest (earliest) deadline """
+    """ This is LLF so we pick the job with the smallest laxity """
     def pick_next_job(self):
-        next_job: Job = random.choice(self.active_jobs) # initialize arbitrarily
-
+        self.update_laxity()
+        min_laxity_jobs: list[Job] = min(self.active_jobs, key=lambda j: j.laxity)
+                
+        return min_laxity_jobs
+    
+    # Survey of Real Time Scheduling Algorithms
+    # laxity = deadline - current time - cpu time still needed
+    def update_laxity(self):
         for job in self.active_jobs:
-            if job.deadline < next_job.deadline:
-                next_job = job
-
-        next_job.state = JobState.EXECUTING
-        return next_job
+            job.laxity = job.deadline - self.current_time - job.execution_requirement
