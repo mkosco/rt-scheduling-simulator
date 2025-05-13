@@ -13,9 +13,9 @@ class LLF(Algorithm):
     """ This is LLF so we pick the job with the smallest laxity """
     def pick_next_job(self):
         self.update_laxity()
-        min_laxity_job: list[Job] = min(self.active_jobs, key=lambda j: j.laxity)
+        min_laxity_job: Job = min(self.active_jobs, key=lambda j: j.laxity)
                 
-        # TODO set jobstate correctly
+        min_laxity_job.state = JobState.EXECUTING
         
         return min_laxity_job
     
