@@ -13,12 +13,11 @@ class LLF(Algorithm):
     """ This is LLF so we pick the job with the smallest laxity """
     def pick_next_job(self):
         self.update_laxity()
-        min_laxity_jobs: list[Job] = min(self.active_jobs, key=lambda j: j.laxity)
+        min_laxity_job: list[Job] = min(self.active_jobs, key=lambda j: j.laxity)
                 
-        # TODO test what happens when two jobs have the same laxity
         # TODO set jobstate correctly
         
-        return min_laxity_jobs
+        return min_laxity_job
     
     # Survey of Real Time Scheduling Algorithms
     # laxity = deadline - current time - cpu time still needed
