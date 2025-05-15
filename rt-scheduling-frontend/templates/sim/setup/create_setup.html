@@ -1,226 +1,3 @@
-<script>
-  const RESOURCE_KEY = "RESOURCES";
-  const TASKSET_KEY = "TASKSET";
-
-  function storeElementInSession(element, sessionItemKey) {
-    var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
-
-    if (!sessionArray) {
-      sessionArray = [];
-    }
-
-    sessionArray.push(element);
-    sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
-
-    updateTable(sessionItemKey);
-  }
-
-  function deleteElementFromSession(index, sessionItemKey) {
-    if (typeof index !== 'number' || isNaN(index)) {
-      console.error("No index provided, couldn't delete element: ", index);
-      return;
-    }
-
-    var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
-    sessionArray.splice(index, 1);
-    sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
-
-    updateTable(sessionItemKey);
-  }
-
-  function updateTable(sessionItemKey) {
-    var elementId;
-
-    if (sessionItemKey === RESOURCE_KEY) {
-      elementId = "resource_table";
-    } else if (sessionItemKey === TASKSET_KEY) {
-      elementId = "task_table";
-    }
-
-    if (!elementId) {
-      console.error("No elementId could be found, no table updated. The following sessionItemKey was provided: ", sessionItemKey);
-      return;
-    }
-
-    const table = document.getElementById(elementId);
-    const sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
-
-    updateHiddenFormField(sessionItemKey, JSON.stringify(sessionArray));
-
-    table.innerHTML = "";
-
-    if (sessionItemKey === RESOURCE_KEY) {
-      populateResourceTable(table, sessionArray);
-    } else if (sessionItemKey === TASKSET_KEY) {
-      populateTasksTable(table, sessionArray);
-    }
-  }
-
-  function updateHiddenFormField(sessionItemKey, fieldValue) {
-    var elementId;
-
-    if (sessionItemKey === RESOURCE_KEY) {
-      elementId = "resources_hidden_input";
-    } else if (sessionItemKey === TASKSET_KEY) {
-      elementId = "tasks_hidden_input";
-    }
-
-    if (!elementId) {
-      console.error("No elementId could be found, no hidden form field updated. The following sessionItemKey was provided: ", sessionItemKey);
-      return;
-    }
-
-    const hidden_field = document.getElementById(elementId);
-
-    if (hidden_field)
-      hidden_field.value = fieldValue;
-  }
-
-  function createTask() {
-    const task_name = document.getElementById('task_name').value;
-    const task_start = document.getElementById('task_start').value;
-    const task_wcet = document.getElementById('task_wcet').value;
-    const task_period = document.getElementById('task_min_period').value;
-    const task_deadline = document.getElementById('task_deadline').value;
-    const task_fps_priority = document.getElementById('task_fps_priority').value;
-
-    storeElementInSession({ name: task_name, start: task_start, wcet: task_wcet, period: task_period, deadline: task_deadline, fps_priority: task_fps_priority }, TASKSET_KEY);
-  }
-
-  function createResource() {
-    const resource_name = document.getElementById('resource_name').value;
-
-    storeElementInSession(resource_name, RESOURCE_KEY);
-  }
-
-  function populateResourceTable(table, sessionArray) {
-    var header_row = table.insertRow(0);
-
-    var header_cell_name = header_row.insertCell();
-    var header_cell_actions = header_row.insertCell();
-
-    header_cell_name.innerHTML = "Resource Name";
-    header_cell_actions.innerHTML = "Actions";
-
-    var i = 0;
-    sessionArray?.forEach(resource => {
-      var row = table.insertRow(1);
-      var cell_name = row.insertCell();
-      var cell_actions = row.insertCell();
-
-      cell_name.innerHTML = resource;
-      cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${RESOURCE_KEY}')" type="button">remove resource</button>`;
-
-      i++;
-    })
-  }
-
-  function populateTasksTable(table, sessionArray) {
-    var header_row = task_table.insertRow(0);
-
-    var header_cell_name = header_row.insertCell();
-    var header_cell_start = header_row.insertCell();
-    var header_cell_wcet = header_row.insertCell();
-    var header_cell_period = header_row.insertCell();
-    var header_cell_deadline = header_row.insertCell();
-    var header_cell_fps_priority = header_row.insertCell();
-    var header_cell_actions = header_row.insertCell();
-
-    header_cell_name.innerHTML = "Task Name";
-    header_cell_start.innerHTML = "Starting Point"
-    header_cell_wcet.innerHTML = "WCET";
-    header_cell_period.innerHTML = "Minimal Period";
-    header_cell_deadline.innerHTML = "Deadline";
-    header_cell_fps_priority.innerHTML = "Priority";
-    header_cell_actions.innerHTML = "Actions";
-
-    var i = 0;
-    sessionArray?.forEach(task => {
-      var row = task_table.insertRow(1);
-
-      var cell_name = row.insertCell();
-      var cell_start = row.insertCell();
-      var cell_wcet = row.insertCell();
-      var cell_period = row.insertCell();
-      var cell_deadline = row.insertCell();
-      var cell_fps_priority = row.insertCell();
-      var cell_actions = row.insertCell();
-
-      cell_name.innerHTML = task.name;
-      cell_start.innerHTML = task.start;
-      cell_wcet.innerHTML = task.wcet;
-      cell_period.innerHTML = task.period;
-      cell_deadline.innerHTML = task.deadline;
-      cell_fps_priority.innerHTML = task.fps_priority ? task.fps_priority : "None";
-
-      cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${TASKSET_KEY}')">remove task</button>`;
-
-      i++;
-    })
-  }
-
-  function toggleResourceElements() {
-    const isResourceToggleChecked = document.getElementById('resources_activated').checked;
-    document.getElementsByName('resource_setting').forEach(e => {
-      e.style.display = isResourceToggleChecked ? "block" : "none";
-    })
-  }
-
-  function toggleFPSElements() {
-    const isFPSSelected = document.getElementById('algorithms').value === "fps";
-    document.getElementsByName('fps_setting').forEach(e => {
-      e.style.display = isFPSSelected ? "block" : "none";
-    })
-  }
-
-  function collectFormData() {
-    const resourcesActivated = document.getElementById('resources_activated').checked;
-    const algorithm = document.getElementById('algorithms').value;
-
-    const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
-    const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
-
-    const formData = {
-      resources_activated: resourcesActivated,
-      algorithm: algorithm,
-      resources: resources,
-      tasks: tasks,
-    };
-
-    return formData;
-  }
-
-  async function sendFormData() {
-    const formData = collectFormData();
-
-    try {
-      const response = await fetch('/setups/new', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        const result = await response.text();
-        document.body.innerHTML = result; // Replace the page content with the result
-      } else {
-        console.error('Error:', response.statusText);
-        alert('Failed to send data to the server.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred while sending data to the server.');
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
-  window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
-  window.addEventListener("DOMContentLoaded", () => toggleFPSElements());
-  window.addEventListener("DOMContentLoaded", () => toggleResourceElements());
-</script>
-
 <style>
   table {
     border-collapse: collapse;
@@ -292,4 +69,229 @@
 <br>
 
 <button type="button" onclick="sendFormData()">Run Simulation</button>
+{% endblock %}
+
+{% block JavaScript %}
+  <script>
+    const RESOURCE_KEY = "RESOURCES";
+    const TASKSET_KEY = "TASKSET";
+
+    function storeElementInSession(element, sessionItemKey) {
+      var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+
+      if (!sessionArray) {
+        sessionArray = [];
+      }
+
+      sessionArray.push(element);
+      sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
+
+      updateTable(sessionItemKey);
+    }
+
+    function deleteElementFromSession(index, sessionItemKey) {
+      if (typeof index !== 'number' || isNaN(index)) {
+        console.error("No index provided, couldn't delete element: ", index);
+        return;
+      }
+
+      var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+      sessionArray.splice(index, 1);
+      sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
+
+      updateTable(sessionItemKey);
+    }
+
+    function updateTable(sessionItemKey) {
+      var elementId;
+
+      if (sessionItemKey === RESOURCE_KEY) {
+        elementId = "resource_table";
+      } else if (sessionItemKey === TASKSET_KEY) {
+        elementId = "task_table";
+      }
+
+      if (!elementId) {
+        console.error("No elementId could be found, no table updated. The following sessionItemKey was provided: ", sessionItemKey);
+        return;
+      }
+
+      const table = document.getElementById(elementId);
+      const sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+
+      updateHiddenFormField(sessionItemKey, JSON.stringify(sessionArray));
+
+      table.innerHTML = "";
+
+      if (sessionItemKey === RESOURCE_KEY) {
+        populateResourceTable(table, sessionArray);
+      } else if (sessionItemKey === TASKSET_KEY) {
+        populateTasksTable(table, sessionArray);
+      }
+    }
+
+    function updateHiddenFormField(sessionItemKey, fieldValue) {
+      var elementId;
+
+      if (sessionItemKey === RESOURCE_KEY) {
+        elementId = "resources_hidden_input";
+      } else if (sessionItemKey === TASKSET_KEY) {
+        elementId = "tasks_hidden_input";
+      }
+
+      if (!elementId) {
+        console.error("No elementId could be found, no hidden form field updated. The following sessionItemKey was provided: ", sessionItemKey);
+        return;
+      }
+
+      const hidden_field = document.getElementById(elementId);
+
+      if (hidden_field)
+        hidden_field.value = fieldValue;
+    }
+
+    function createTask() {
+      const task_name = document.getElementById('task_name').value;
+      const task_start = document.getElementById('task_start').value;
+      const task_wcet = document.getElementById('task_wcet').value;
+      const task_period = document.getElementById('task_min_period').value;
+      const task_deadline = document.getElementById('task_deadline').value;
+      const task_fps_priority = document.getElementById('task_fps_priority').value;
+
+      storeElementInSession({ name: task_name, start: task_start, wcet: task_wcet, period: task_period, deadline: task_deadline, fps_priority: task_fps_priority }, TASKSET_KEY);
+    }
+
+    function createResource() {
+      const resource_name = document.getElementById('resource_name').value;
+
+      storeElementInSession(resource_name, RESOURCE_KEY);
+    }
+
+    function populateResourceTable(table, sessionArray) {
+      var header_row = table.insertRow(0);
+
+      var header_cell_name = header_row.insertCell();
+      var header_cell_actions = header_row.insertCell();
+
+      header_cell_name.innerHTML = "Resource Name";
+      header_cell_actions.innerHTML = "Actions";
+
+      var i = 0;
+      sessionArray?.forEach(resource => {
+        var row = table.insertRow(1);
+        var cell_name = row.insertCell();
+        var cell_actions = row.insertCell();
+
+        cell_name.innerHTML = resource;
+        cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${RESOURCE_KEY}')" type="button">remove resource</button>`;
+
+        i++;
+      })
+    }
+
+    function populateTasksTable(table, sessionArray) {
+      var header_row = task_table.insertRow(0);
+
+      var header_cell_name = header_row.insertCell();
+      var header_cell_start = header_row.insertCell();
+      var header_cell_wcet = header_row.insertCell();
+      var header_cell_period = header_row.insertCell();
+      var header_cell_deadline = header_row.insertCell();
+      var header_cell_fps_priority = header_row.insertCell();
+      var header_cell_actions = header_row.insertCell();
+
+      header_cell_name.innerHTML = "Task Name";
+      header_cell_start.innerHTML = "Starting Point"
+      header_cell_wcet.innerHTML = "WCET";
+      header_cell_period.innerHTML = "Minimal Period";
+      header_cell_deadline.innerHTML = "Deadline";
+      header_cell_fps_priority.innerHTML = "Priority";
+      header_cell_actions.innerHTML = "Actions";
+
+      var i = 0;
+      sessionArray?.forEach(task => {
+        var row = task_table.insertRow(1);
+
+        var cell_name = row.insertCell();
+        var cell_start = row.insertCell();
+        var cell_wcet = row.insertCell();
+        var cell_period = row.insertCell();
+        var cell_deadline = row.insertCell();
+        var cell_fps_priority = row.insertCell();
+        var cell_actions = row.insertCell();
+
+        cell_name.innerHTML = task.name;
+        cell_start.innerHTML = task.start;
+        cell_wcet.innerHTML = task.wcet;
+        cell_period.innerHTML = task.period;
+        cell_deadline.innerHTML = task.deadline;
+        cell_fps_priority.innerHTML = task.fps_priority ? task.fps_priority : "None";
+
+        cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${TASKSET_KEY}')">remove task</button>`;
+
+        i++;
+      })
+    }
+
+    function toggleResourceElements() {
+      const isResourceToggleChecked = document.getElementById('resources_activated').checked;
+      document.getElementsByName('resource_setting').forEach(e => {
+        e.style.display = isResourceToggleChecked ? "block" : "none";
+      })
+    }
+
+    function toggleFPSElements() {
+      const isFPSSelected = document.getElementById('algorithms').value === "fps";
+      document.getElementsByName('fps_setting').forEach(e => {
+        e.style.display = isFPSSelected ? "block" : "none";
+      })
+    }
+
+    function collectFormData() {
+      const resourcesActivated = document.getElementById('resources_activated').checked;
+      const algorithm = document.getElementById('algorithms').value;
+
+      const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
+      const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
+
+      const formData = {
+        resources_activated: resourcesActivated,
+        algorithm: algorithm,
+        resources: resources,
+        tasks: tasks,
+      };
+
+      return formData;
+    }
+
+    async function sendFormData() {
+      const formData = collectFormData();
+
+      try {
+        const response = await fetch('/setups/new', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          const result = await response.text();
+          document.body.innerHTML = result; // Replace the page content with the result
+        } else {
+          console.error('Error:', response.statusText);
+          alert('Failed to send data to the server.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while sending data to the server.');
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
+    window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
+    window.addEventListener("DOMContentLoaded", () => toggleFPSElements());
+    window.addEventListener("DOMContentLoaded", () => toggleResourceElements());
+  </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, render_template, request, jsonify, flash, current_app
+    Blueprint, redirect, render_template, request, jsonify, flash, current_app, url_for
 )
 import os
 import json
@@ -63,8 +63,13 @@ def create_setup():
                 current_app.logger.debug(f"simulation subprocess: {result.stdout}")
                 flash("Simulation ran successfully!")
 
+            reuslt_data = None
+            with open(save_path, 'r') as result_file:
+                reuslt_data = json.load(result_file)
                 
-            return render_template('/sim/result.html')
+            html = render_template("/sim/result.html", chart_data=reuslt_data)
+            current_app.logger.debug(html)  # Print full rendered HTML
+            return html
 
         except Exception as e:
             #TODO add error handling

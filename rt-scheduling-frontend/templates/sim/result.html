@@ -5,7 +5,22 @@
 {% endblock %}
 
 {% block content %}
-<p>The Taskset is schedulable with EDF</p>
 
-<img src="/static/visualization_placeholder.png" />
+<p>The Taskset is / not schedulable</p>
+
+<button onclick="printHi()"> Hii!</button>
+{% endblock %}
+
+{% block JavaScript %}
+    <script>
+        console.log("🔥 JavaScript block is rendering!");
+        // Convert the JSON string passed from Flask to a JavaScript object
+        const data = {{ chart_data | tojson }};
+        console.log(data);
+        console.log("Hiiii!!!");
+
+        function printHi() {
+            console.log("Hii!");
+        }
+    </script>
 {% endblock %}
