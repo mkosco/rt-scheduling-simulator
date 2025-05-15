@@ -11,7 +11,9 @@ class Algorithm(ABC):
         self.max_timepoint = max_timepoint
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
-        self.result = []
+        self.result = {}
+        self.result["summary"] = {}
+        self.result["timeline"] = []
         self.current_time = 0
     
     @abstractmethod
@@ -27,7 +29,7 @@ class Algorithm(ABC):
     def pick_next_job(self) -> Job:
         pass
 
-    def calculate(self) -> list:
+    def calculate(self) -> dict:
         """This function performs the algorithm calculation"""
         i = 0
         while True:
@@ -44,12 +46,13 @@ class Algorithm(ABC):
 
             active_job_copy = list(map(asdict, self.active_jobs))
             
-            self.result.append({'timepoint' : i, 'active_jobs' : active_job_copy})
+            self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy})
             print(f"picked job: {picked_job}")
 
             picked_job.execution_requirement -= 1
             i += 1
 
+    # TODO refactor out 
     def generate_jobs(self) -> list[Job]:
         "This function is used to generate the joblist for the considered timeframe from the task list"
         jobs = []
@@ -86,6 +89,7 @@ class Algorithm(ABC):
         pprint(jobs)
         return jobs
     
+    # TODO refactor out
     def update_active_jobs(self, current_time) -> None:
         """ 
         This function updates the list of currently active jobs, this list is used in algorithm calculation.\n
