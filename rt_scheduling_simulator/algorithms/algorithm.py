@@ -43,11 +43,10 @@ class Algorithm(ABC):
             pprint(self.active_jobs)
 
             picked_job = self.pick_next_job()
+            print(f"picked job: {picked_job}")
 
             active_job_copy = list(map(asdict, self.active_jobs))
-            
             self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy})
-            print(f"picked job: {picked_job}")
 
             picked_job.execution_requirement -= 1
             i += 1
@@ -107,8 +106,10 @@ class Algorithm(ABC):
                 job.state = JobState.WAITING
                 self.active_jobs.append(job)
             elif not job_is_active and job in self.active_jobs:
+                job.state = JobState.FINNISHED
+
                 if job.execution_requirement > 0:
                     job.state = JobState.MISSED
                     print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
-                job.state = JobState.FINNISHED
+                self.result["summary"][job.name] = asdict(job)
                 self.active_jobs.remove(job) 
