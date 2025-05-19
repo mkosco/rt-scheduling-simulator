@@ -1,6 +1,7 @@
 from typing import Optional
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
 from rt_scheduling_simulator.model.job import Job, JobState
+from rt_scheduling_simulator.logging import debug_print
 
 class MLLF(Algorithm):
     def __init__(self, tasks, resources, max_timepoint):
@@ -8,7 +9,7 @@ class MLLF(Algorithm):
         self.previous_job: Optional[Job] = None
         
     def summarize(self):
-        print(f"\nMLLF")
+        debug_print(f"\nMLLF")
         super().summarize()
         pass
 

@@ -1,10 +1,10 @@
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
 from rt_scheduling_simulator.model.job import Job, JobState
-import random
+from rt_scheduling_simulator.logging import debug_print
 
 class FPS(Algorithm):
     def summarize(self):
-        print(f"\nFPS")
+        debug_print(f"\nFPS")
         super().summarize()
         pass
 

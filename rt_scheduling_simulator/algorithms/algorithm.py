@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from pprint import pprint
 from dataclasses import asdict
+from rt_scheduling_simulator.logging import debug_pprint, debug_print
 from rt_scheduling_simulator.model.job import Job, JobState
 from rt_scheduling_simulator.model.task import Task 
 
@@ -19,11 +19,11 @@ class Algorithm(ABC):
     @abstractmethod
     def summarize(self) -> None:
         """This function prints a sumary of the algorithm and it's initialization"""
-        print(f"tasks: {self.tasks}")
-        print(f"jobs: ")
-        pprint(self.jobs)
-        print(f"resources: {self.resources}")
-        print(f"max timepoint: {self.max_timepoint} \n")
+        debug_print(f"tasks: {self.tasks}")
+        debug_print(f"jobs: ")
+        debug_pprint(self.jobs)
+        debug_print(f"resources: {self.resources}")
+        debug_print(f"max timepoint: {self.max_timepoint} \n")
 
     @abstractmethod
     def pick_next_job(self) -> Job:
@@ -39,11 +39,11 @@ class Algorithm(ABC):
             if not self.active_jobs:
                 return self.result
             
-            print(f"timepoint: {i}, active jobs:")
-            pprint(self.active_jobs)
+            debug_print(f"timepoint: {i}, active jobs:")
+            debug_pprint(self.active_jobs)
 
             picked_job = self.pick_next_job()
-            print(f"picked job: {picked_job}")
+            debug_print(f"picked job: {picked_job}")
 
             active_job_copy = list(map(asdict, self.active_jobs))
             self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy})
@@ -64,7 +64,7 @@ class Algorithm(ABC):
         prev_period = self.tasks[0].period
 
         for task in self.tasks:
-            print(f"\ncreating jobs for task: {task}")
+            debug_print(f"\ncreating jobs for task: {task}")
 
             # one is the highest priority
             if task.period > prev_period:
@@ -72,7 +72,7 @@ class Algorithm(ABC):
 
             # TODO check behaviour if division is not round
             num_jobs = int(self.max_timepoint / task.period)
-            print(f"number of jobs for task: {num_jobs}")
+            debug_print(f"number of jobs for task: {num_jobs}")
             
             for i in range(num_jobs):
                 jobs.append(Job(name=f"{task.name.strip()}_j{i}",
@@ -84,8 +84,8 @@ class Algorithm(ABC):
                                 fps_priority=task.fps_priority,
                                 rms_priority=rms_priority))
 
-        print(f"\njobs for taskset:\n")
-        pprint(jobs)
+        debug_print(f"\njobs for taskset:\n")
+        debug_pprint(jobs)
         return jobs
     
     # TODO refactor out
@@ -110,6 +110,6 @@ class Algorithm(ABC):
 
                 if job.execution_requirement > 0:
                     job.state = JobState.MISSED
-                    print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
+                    debug_print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
                 self.result["summary"][job.name] = asdict(job)
                 self.active_jobs.remove(job) 

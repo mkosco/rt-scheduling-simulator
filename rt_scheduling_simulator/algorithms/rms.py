@@ -1,10 +1,9 @@
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
-from rt_scheduling_simulator.model.job import Job, JobState
-import random
-
+from rt_scheduling_simulator.model.job import JobState
+from rt_scheduling_simulator.logging import debug_print
 class RMS(Algorithm):
     def summarize(self):
-        print(f"\nRMS")
+        debug_print(f"\nRMS")
         super().summarize()
         pass
 

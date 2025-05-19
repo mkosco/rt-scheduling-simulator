@@ -1,12 +1,12 @@
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
 from rt_scheduling_simulator.model.job import Job, JobState
-import random
+from rt_scheduling_simulator.logging import debug_print
 
 class LLF(Algorithm):
     laxity = {}
     
     def summarize(self):
-        print(f"\nLLF")
+        debug_print(f"\nLLF")
         super().summarize()
         pass
 

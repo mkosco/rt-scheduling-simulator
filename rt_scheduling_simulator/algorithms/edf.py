@@ -1,10 +1,11 @@
 from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
 from rt_scheduling_simulator.model.job import Job, JobState
+from rt_scheduling_simulator.logging import debug_print
 import random
 
 class EDF(Algorithm):
     def summarize(self):
-        print(f"\nEDF")
+        debug_print(f"\nEDF")
         super().summarize()
         pass
 
