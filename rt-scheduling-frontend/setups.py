@@ -7,13 +7,21 @@ import uuid
 import subprocess
 
 bp = Blueprint('setups', __name__, url_prefix='/setups')
+# Define the folder path for storing JSON files
+setup_folder_path = os.path.join(os.getcwd(), 'data/sim_setup_files')
+result_folder_path = os.path.join(os.getcwd(), 'data/sim_result_files')
 
 
-@bp.route('/', methods=['GET', 'POST'])
+@bp.route('/list', methods=['GET'])
 def list_setups():
     if request.method == 'GET':
         return render_template('/sim/setup/list_setups.html')
 
+@bp.route('/result/<string:result_id>', methods=['GET'])
+def view_result(result_id: str):
+    with open(f"{result_folder_path}/rt-scheduling-simulator-result_{result_id}.json") as f:
+        data = json.load(f)
+    return render_template("sim/result.html", chart_data=data)
 
 @bp.route('/new', methods=['GET', 'POST'])
 def create_setup():
@@ -25,19 +33,16 @@ def create_setup():
             current_app.logger.debug(f"setup creation request data: {data}")
 
             if not data:
-                # https://flask.palletsprojects.com/en/stable/patterns/flashing/#flashing-with-categories
-                #TODO add error handling
                 flash('No JSON data was recieved!')
+                return jsonify({'error': 'No JSON data was received!'}), 400
 
-            # Define the folder path for storing JSON files
-            folder_path = os.path.join(os.getcwd(), 'data/sim_setup_files')
-            current_app.logger.debug(f"folder path for sim setup file storage: {folder_path}")
+            current_app.logger.debug(f"folder path for sim setup file storage: {setup_folder_path}")
             
             # Ensure the folder exists
-            os.makedirs(folder_path, exist_ok=True)
+            os.makedirs(setup_folder_path, exist_ok=True)
 
             # Define the file path for the JSON file
-            save_path = os.path.join(folder_path, f"rt-scheduling-simulator-setup_{uuid.uuid4()}.json")
+            save_path = os.path.join(setup_folder_path, f"rt-scheduling-simulator-setup_{uuid.uuid4()}.json")
             current_app.logger.debug(f"folder path for the created sim setup file: {save_path}")
 
             # Save the JSON data to the file
@@ -54,6 +59,7 @@ def create_setup():
                 capture_output=True,
                 text=True
             )
+            
 
             # Check the result of the subprocess
             if result.returncode != 0:
@@ -62,15 +68,12 @@ def create_setup():
             else:
                 current_app.logger.debug(f"simulation subprocess: {result.stdout}")
                 flash("Simulation ran successfully!")
+            
+            lines = result.stdout.splitlines()
+            result_id = [line.strip() for line in lines][-1]
 
-            reuslt_data = None
-            with open(save_path, 'r') as result_file:
-                reuslt_data = json.load(result_file)
-                
-            html = render_template("/sim/result.html", chart_data=reuslt_data)
-            current_app.logger.debug(html)  # Print full rendered HTML
-            return html
-
+            url = url_for('setups.view_result', result_id=result_id)
+            return redirect(url)
+        
         except Exception as e:
-            #TODO add error handling
             return jsonify({'error': str(e)}), 500

@@ -81,7 +81,8 @@ def main():
             os.makedirs(folder_path, exist_ok=True)
 
             # Define the file path for the JSON file
-            save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{uuid.uuid4()}.json")
+            result_id = uuid.uuid4()
+            save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{result_id}.json")
             debug_print(f"folder path for the created sim result file: {save_path}")
 
             algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=resources, max_timepoint=max_timepoint)
@@ -93,6 +94,8 @@ def main():
                 data["result"] = algorithm.calculate()
 
                 json.dump(data, json_file, indent=4)
+                
+            print(result_id)
 
     except FileNotFoundError:
         debug_print(f"Error: File '{argument}' not found.")

@@ -268,21 +268,17 @@
       const formData = collectFormData();
 
       try {
-        const response = await fetch('/setups/new', {
-          method: 'POST',
+        fetch("/setups/new", {
+          method: "POST",
+          body: JSON.stringify(formData),
           headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
+            "Content-Type": "application/json"
+          }
+        }).then(response => {
+          if (response.redirected) {
+            window.location.href = response.url; // Let browser load the full page
+          }
         });
-
-        if (response.ok) {
-          const result = await response.text();
-          document.body.innerHTML = result; // Replace the page content with the result
-        } else {
-          console.error('Error:', response.statusText);
-          alert('Failed to send data to the server.');
-        }
       } catch (error) {
         console.error('Error:', error);
         alert('An error occurred while sending data to the server.');

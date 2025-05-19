@@ -11,6 +11,7 @@ def create_app(test_config=None):
         UPLOAD_FOLDER=UPLOAD_FOLDER,
         ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
     )
+    app.jinja_env.cache = {}
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
