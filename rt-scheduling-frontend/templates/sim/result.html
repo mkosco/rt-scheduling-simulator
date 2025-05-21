@@ -5,12 +5,181 @@
 {% endblock %}
 
 {% block content %}
+<div id="tooltip"
+    style="position:absolute; display:none; background:#fff; border:1px solid #ccc; padding:5px; pointer-events:none; z-index:10;">
+</div>
 
 {% endblock %}
 
 {% block JavaScript %}
-    <script>
-        const data = {{ chart_data | tojson }};
-        console.log(data);
-    </script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    const data = {{ chart_data | tojson }};
+    console.log(data);
+
+    // Get task names from the tasks list in the JSON
+    const taskNames = data.tasks.map(task => task.name);
+
+    // Extract timeline
+    const timeline = data.result.timeline;
+
+    // Prepare data for plotting: [{timepoint, task, state}]
+    const plotData = [];
+    timeline.forEach(tp => {
+        tp.active_jobs.forEach(job => {
+            const baseTaskName = job.name.split('_')[0];
+            plotData.push({
+                timepoint: tp.timepoint,
+                task: baseTaskName,
+                state: job.state,
+                jobName: job.name,
+                remaining: job.execution_requirement,
+            });
+        });
+    });
+
+    // Color function based on state
+    function jobColor(state) {
+        if (state === "executing") return "#4caf50"; // green
+        if (state === "waiting") return "#e0e0e0";   // pale gray
+        return "#bdbdbd"; // fallback gray for other states
+    }
+
+    // Chart dimensions
+    const margin = { top: 40, right: 20, bottom: 40, left: 80 };
+    const width = 600 - margin.left - margin.right;
+    const height = 200 - margin.top - margin.bottom;
+
+    // Create SVG
+    const svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // X scale: timepoints
+    const x = d3.scaleLinear()
+        .domain(d3.extent(plotData, d => d.timepoint))
+        .range([0, width]);
+
+    // Y scale: task names from the tasks list
+    const y = d3.scalePoint()
+        .domain(taskNames)
+        .range([0, height])
+        .padding(0.5);
+
+    // X axis
+    svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(timeline.length));
+
+    // Y axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Rectangle dimensions
+    const rectWidth = Math.abs(x(1) - x(0));
+    const rectHeight = (taskNames.length > 1) ? Math.abs(y(taskNames[1]) - y(taskNames[0])) * 0.5 : 15;
+
+    // Draw rectangles for each (timepoint, task)
+    svg.selectAll("rect")
+        .data(plotData)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.timepoint))
+        .attr("y", d => y(d.task) - rectHeight / 2)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("fill", d => jobColor(d.state))
+        .attr("stroke", "#333")           // Border color (dark gray)
+        .attr("stroke-width", 0.5)        // Border thickness
+        .on("mouseover", function (event, d) {
+            d3.select("#tooltip")
+                .style("display", "block")
+                .html(`Job: ${d.jobName} (${d.task}) with state: ${d.state}, remaining: ${d.remaining - 1}`); // TODO think the off by one through and fix it cohesively
+        })
+        .on("mousemove", function (event) {
+            d3.select("#tooltip")
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 20) + "px");
+        })
+        .on("mouseout", function () {
+            d3.select("#tooltip")
+                .style("display", "none");
+        });
+
+    // Axis labels
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 5)
+        .attr("text-anchor", "middle")
+        .text("Timepoint");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -margin.left + 20)
+        .attr("text-anchor", "middle")
+        .text("Task");
+
+    // Calculate row height for vertical lines
+    let rowHeight;
+    if (taskNames.length > 1) {
+        rowHeight = Math.abs(y(taskNames[1]) - y(taskNames[0])) - 15;
+    } else {
+        rowHeight = 40;
+    }
+
+    // --- Draw deadline lines for each job ---
+
+    // Collect all (deadline, task) pairs from all jobs in the timeline
+    const deadlineLines = [];
+    timeline.forEach(tp => {
+        tp.active_jobs.forEach(job => {
+            const baseTaskName = job.name.split('_')[0];
+            // Use a string key to avoid duplicate lines for the same job
+            const key = `${job.deadline}_${job.name}`;
+            if (!deadlineLines.some(d => d.key === key)) {
+                deadlineLines.push({
+                    deadline: +job.deadline,
+                    task: baseTaskName,
+                    jobName: job.name,
+                    key: key
+                });
+            }
+        });
+    });
+
+    console.log(deadlineLines)
+
+    // Draw a vertical line for each job's deadline
+    svg.selectAll(".deadline-line")
+        .data(deadlineLines)
+        .enter()
+        .append("line")
+        .attr("class", "deadline-line")
+        .attr("x1", d => x(d.deadline))
+        .attr("x2", d => x(d.deadline))
+        .attr("y1", d => y(d.task) - rowHeight / 2)
+        .attr("y2", d => y(d.task) + rowHeight / 2)
+        .attr("stroke", "red")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "4 2")
+        .on("mouseover", function (event, d) {
+            d3.select("#tooltip")
+                .style("display", "block")
+                .html(`Deadline for ${d.jobName} (${d.task}) at timepoint ${d.deadline}`);
+        })
+        .on("mousemove", function (event) {
+            d3.select("#tooltip")
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 20) + "px");
+        })
+        .on("mouseout", function () {
+            d3.select("#tooltip")
+                .style("display", "none");
+        });
+
+</script>
 {% endblock %}
