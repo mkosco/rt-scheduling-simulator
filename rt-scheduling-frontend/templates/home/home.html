@@ -5,19 +5,21 @@
 {% endblock %}
 
 {% block content %}
-<p>
+<p class="flow-text">
     Welcome to the Real-Time Scheduling Simulator! This is my Bachelor's Thesis Project.
     It is meant to help you understand and visualize RT-Scheduling Algorithms.
 </p>
 
-<br>
+<div class="row">
+    <a href="{{ url_for('setups.create_setup') }}">
+        <button class="btn waves-effect waves-light green lighten-1">Start a new Simulation</button
+            class="btn waves-effect waves-light">
+    </a>
 
-<a href="{{ url_for('setups.create_setup') }}">
-    <button class="btn waves-effect waves-light green lighten-1">Start a new Simulation</button class="btn waves-effect waves-light">
-</a>
+</div>
 
-<br>
-<br>
-
-<button class="btn waves-effect waves-light green lighten-1">Visualize past Results</button class="btn waves-effect waves-light">
+<div class="row">
+    <button class="btn waves-effect waves-light green lighten-1">Visualize past Results</button
+        class="btn waves-effect waves-light">
+</div>
 {% endblock %}
