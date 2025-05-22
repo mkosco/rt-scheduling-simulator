@@ -54,7 +54,7 @@ def create_setup():
             print(f"project root: {project_root}")
             
             result = subprocess.run(
-                ['python', '-m', simulation_package, save_path],
+                ['python', '-m', simulation_package, save_path, "--debug"],
                 cwd=project_root,
                 capture_output=True,
                 text=True
