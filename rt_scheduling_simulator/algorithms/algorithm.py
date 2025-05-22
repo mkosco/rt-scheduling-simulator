@@ -12,7 +12,7 @@ class Algorithm(ABC):
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
         self.result = {}
-        self.result["summary"] = {}
+        self.result["summary"] = []
         self.result["timeline"] = []
         self.current_time = 0
     
@@ -111,5 +111,5 @@ class Algorithm(ABC):
                 if job.execution_requirement > 0:
                     job.state = JobState.MISSED
                     debug_print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
-                self.result["summary"][job.name] = asdict(job)
+                self.result["summary"].append(asdict(job))
                 self.active_jobs.remove(job) 

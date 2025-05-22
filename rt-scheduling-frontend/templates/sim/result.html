@@ -9,6 +9,11 @@
     style="position:absolute; display:none; background:#fff; border:1px solid #ccc; padding:5px; pointer-events:none; z-index:10;">
 </div>
 
+<!-- Result Summary -->
+<div>
+    <span id="result-text"></span>
+</div>
+
 {% endblock %}
 
 {% block JavaScript %}
@@ -17,6 +22,20 @@
     const data = {{ chart_data | tojson }};
     console.log(data);
 
+    var schedulable = false;
+    var missingJobs = []
+
+    // collect missing jobs from summary
+    data.result.summary.forEach(job => {
+        if (job.state === "missed") {
+            missingJobs.push(job);
+        }
+    });
+
+    schedulable = missingJobs.length === 0
+
+    document.getElementById('result-text').innerText = `The Taskset is ${ schedulable ? '' : 'not'} schedulable with ${data.algorithm}.`;
+    
     // Get task names from the tasks list in the JSON
     const taskNames = data.tasks.map(task => task.name);
 
