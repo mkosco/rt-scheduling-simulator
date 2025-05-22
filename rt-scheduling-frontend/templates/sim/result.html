@@ -59,8 +59,9 @@
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // X scale: timepoints
+    const timeExtent = d3.extent(plotData, d => d.timepoint);
     const x = d3.scaleLinear()
-        .domain(d3.extent(plotData, d => d.timepoint))
+        .domain([timeExtent[0], timeExtent[1] + 1])
         .range([0, width]);
 
     // Y scale: task names from the tasks list
@@ -72,7 +73,7 @@
     // X axis
     svg.append("g")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(timeline.length));
+        .call(d3.axisBottom(x).ticks(timeline.length + 1));
 
     // Y axis
     svg.append("g")
