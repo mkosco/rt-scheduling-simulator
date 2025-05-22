@@ -56,10 +56,15 @@
 <div class="section">
   <div name="resource_setting">
     <h4>Resources</h4>
-    <input type="text" id="resource_name" placeholder="Resource Name" />
-    <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add
-      Resource</button class="btn waves-effect waves-light">
-
+    <div class="row">
+      <div class="input-field col">
+        <input type="text" id="resource_name" />
+        <label for="resource_name">Resource Name</label>
+      </div>
+      <div class="input-field col">
+        <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add Resource</button>
+      </div>
+    </div>
     <!-- TODO display some special text when table is empty -->
     <table id="resource_table"></table>
   </div>
