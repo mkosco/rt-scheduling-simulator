@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    {% block title %}Result{% endblock %}
+{% block title %}Result{% endblock %}
 {% endblock %}
 
 {% block content %}
@@ -11,15 +11,61 @@
 
 <!-- Result Summary -->
 <div>
-    <span id="result-text"></span>
+    <p id="result-text" class="flow-text"></p>
 </div>
+
+<!-- SVG container for D3 plot -->
+<svg id="schedule-svg" style="width: 100%; height: 100%; display: block;"></svg>
+
+<button id="save-pdf" class="btn waves-effect waves-light green">Download</button>
 
 {% endblock %}
 
 {% block JavaScript %}
 <script src="https://d3js.org/d3.v7.min.js"></script>
+
+<script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/svg2pdf.js@2.0.0/dist/svg2pdf.umd.min.js"></script>
+
 <script>
-    const data = {{ chart_data | tojson }};
+    const { jsPDF } = window.jspdf;
+    const { svg2pdf } = window.svg2pdf;
+
+    async function saveAsPdf() {
+        const svgElement = document.getElementById("schedule-svg");
+        svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+
+        // Set consistent width and height
+        const bbox = svgElement.getBoundingClientRect(); // use getBBox for content bounds
+        const width = bbox.width * (72 / 96);
+        const height = bbox.height * (72 / 96);
+
+        console.log(width);
+        console.log(height);
+
+        // Create the PDF with the correct size
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'pt',  // use points for better fidelity
+            format: [100, 50]
+        });
+
+        // Now render into PDF
+        await svg2pdf(svgElement, pdf, {
+            xOffset: 0,
+            yOffset: 0,
+            scale: 1,
+        });
+        
+        pdf.save("chart.pdf");
+    }
+
+    document.querySelector("#save-pdf").addEventListener("click", saveAsPdf);
+</script>
+
+<script>
+    const data = {{ chart_data | tojson | safe }};
     console.log(data);
 
     var schedulable = false;
@@ -34,7 +80,7 @@
 
     schedulable = missingJobs.length === 0
 
-    document.getElementById('result-text').innerText = `The Taskset is ${ schedulable ? '' : 'not'} schedulable with ${data.algorithm}.`;
+    document.getElementById('result-text').innerText = `The Taskset is ${schedulable ? '' : 'not'} schedulable with ${data.algorithm}.`;
 
     // Get task names from the tasks list in the JSON
     const taskNames = data.tasks.map(task => task.name);
@@ -67,13 +113,14 @@
     // Chart dimensions
     const margin = { top: 40, right: 20, bottom: 40, left: 80 };
     const width = 600 - margin.left - margin.right;
-    const height = 200 - margin.top - margin.bottom;
+    const height = 300 - margin.top - margin.bottom;
 
-    // Create SVG
-    const svg = d3.select("body")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+    // Select the SVG element in the content block
+    const svg = d3.select("#schedule-svg")
+        .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .style("width", "100%")
+        .style("height", "100%")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
