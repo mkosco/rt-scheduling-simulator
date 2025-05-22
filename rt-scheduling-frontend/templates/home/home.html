@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h1>{% block title %}Home{% endblock %}</h1>
+{% block title %}Home{% endblock %}
 {% endblock %}
 
 {% block content %}
@@ -13,11 +13,11 @@
 <br>
 
 <a href="{{ url_for('setups.create_setup') }}">
-    <button>Start a new Simulation</button>
+    <button class="btn waves-effect waves-light green lighten-1">Start a new Simulation</button class="btn waves-effect waves-light">
 </a>
 
 <br>
 <br>
 
-<button>Visualize past Results</button>
+<button class="btn waves-effect waves-light green lighten-1">Visualize past Results</button class="btn waves-effect waves-light">
 {% endblock %}

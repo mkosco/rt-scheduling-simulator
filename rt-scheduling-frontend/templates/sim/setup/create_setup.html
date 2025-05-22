@@ -1,293 +1,340 @@
-<style>
-  table {
-    border-collapse: collapse;
-    width: 50%;
-  }
-
-  td,
-  th {
-    border: 1px solid black;
-    padding: 8px;
-  }
-</style>
-
 {% extends 'base.html' %}
 
 {% block header %}
-<h1>{% block title %}Create new Setup{% endblock %}</h1>
+{% block title %}Create new Setup{% endblock %}
 {% endblock %}
 
 {% block content %}
-<h2>Settings</h2>
-<input type="checkbox" id="resources_activated" name="resources_activated" value="True"
-  onchange="toggleResourceElements()" checked>
-<label for="resources_activated">Resources</label><br>
+<div class="section">
+  <h4>Settings</h4>
 
-<div name="resource_setting">
-  <input type="radio" id="pip" name="resource_strat" value="pip">
-  <label for="pip">Priority Inheritance Protocol</label><br>
+  <!-- Resources Checkbox -->
+  <label>
+    <input type="checkbox" id="resources_activated" name="resources_activated" value="True"
+      onchange="toggleResourceElements()" checked>
+    <span>Resources</span>
+  </label>
 
-  <input type="radio" id="pcp" name="resource_strat" value="pcp">
-  <label for="pcp">Priority Ceiling Protocol</label><br>
+  <!-- Resource Strategy Radios -->
+  <div class="input-field" name="resource_setting">
+    <p>
+      <label>
+        <input type="radio" id="pip" name="resource_strat" value="pip">
+        <span>Priority Inheritance Protocol</span>
+      </label>
+    </p>
+    <p>
+      <label>
+        <input type="radio" id="pcp" name="resource_strat" value="pcp">
+        <span>Priority Ceiling Protocol</span>
+      </label>
+    </p>
+    <p>
+      <label>
+        <input type="radio" id="none" name="resource_strat" value="none">
+        <span>No Deadlock-Avoidance Strategy</span>
+      </label>
+    </p>
+  </div>
 
-  <input type="radio" id="none" name="resource_strat" value="none">
-  <label for="none">No Deadlock-Avoidance Strategy</label><br>
+  <div class="divider"></div>
+
+  <!-- Algorithm Dropdown -->
+  <div class="input-field">
+    <select id="algorithms" name="algorithms" onchange="toggleFPSElements()">
+      <option value="edf" selected>Earliest Deadline First (EDF)</option>
+      <option value="llf">Least Laxity First (LLF)</option>
+      <option value="mllf">Modified Least Laxity First (MLLF)</option>
+      <option value="rms">Rate Monotonic Scheduling (RMS)</option>
+      <option value="fps">Fixed Priority Scheduling (FPS)</option>
+    </select>
+    <label for="algorithms">Choose an algorithm</label>
+  </div>
 </div>
 
-<label for="algorithms">Choose an algorithm:</label>
-<select id="algorithms" name="algorithms" onchange="toggleFPSElements()">
-  <option value="edf" selected>Earliest Deadline First (EDF)</option>
-  <option value="llf">Least Laxity First (LLF)</option>
-  <option value="mllf">Modified Least Laxity First (MLLF)</option>
-  <option value="rms">Rate Monotonic Scheduling (RMS)</option>
-  <option value="fps">Fixed Priority Scheduling (FPS)</option>
-</select>
 
-<div name="resource_setting">
-  <h2>Resources</h2>
-  <input type="text" id="resource_name" placeholder="Resource Name" />
-  <button onclick="createResource()" type="button">Add Resource</button>
+<div class="section">
+  <div name="resource_setting">
+    <h4>Resources</h4>
+    <input type="text" id="resource_name" placeholder="Resource Name" />
+    <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add
+      Resource</button class="btn waves-effect waves-light">
 
+    <!-- TODO display some special text when table is empty -->
+    <table id="resource_table"></table>
+  </div>
+</div>
+
+<div class="section">
+  <h4>Taskset</h4>
+  <div class="row">
+    <div class="input-field col">
+      <input type="text" id="task_name" />
+      <label for="task_name">Name</label>
+    </div>
+
+    <div class="input-field col">
+      <input type="number" id="task_start" />
+      <label for="task_start">Starting Point</label>
+    </div>
+
+    <div class="input-field col">
+      <input type="number" id="task_wcet" />
+      <label for="task_wcet">WCET</label>
+    </div>
+
+    <div class="input-field col">
+      <input type="number" id="task_min_period" />
+      <label for="task_min_period">Period</label>
+    </div>
+
+    <div class="input-field col">
+      <input type="number" id="task_deadline" />
+      <label for="task_deadline">Deadline</label>
+    </div>
+
+    <div class="input-field col" name="fps_setting" style="display: none;">
+      <input type="number" id="task_fps_priority" />
+      <label for="task_fps_priority">FPS Priority</label>
+    </div>
+
+    <div class=" input-field col">
+      <button class="btn waves-effect waves-light green lighten-1" onclick="createTask()" type="button">Add Task</button
+        class="btn waves-effect waves-light">
+    </div>
+  </div>
   <!-- TODO display some special text when table is empty -->
-  <table id="resource_table"></table>
+  <table id="task_table"></table>
 </div>
 
-<h2>Taskset</h2>
-<input type="text" id="task_name" placeholder="Task Name" />
-<input type="number" id="task_start" placeholder="Starting Point" />
-<input type="number" id="task_wcet" placeholder="WCET" />
-<input type="number" id="task_min_period" placeholder="Minimal Period" />
-<input type="number" id="task_deadline" placeholder="Deadline" />
-<input type="number" id="task_fps_priority" name="fps_setting" style="display: none;" placeholder="Priority" />
-<button onclick="createTask()" type="button">Add Task</button>
-
-<!-- TODO display some special text when table is empty -->
-<table id="task_table"></table>
-
-
-<br>
-<br>
-
-<button type="button" onclick="sendFormData()">Run Simulation</button>
+<button class="btn waves-effect waves-light green lighten-1" type="button" onclick="sendFormData()">Run
+  Simulation</button class="btn waves-effect waves-light">
 {% endblock %}
 
 {% block JavaScript %}
-  <script>
-    const RESOURCE_KEY = "RESOURCES";
-    const TASKSET_KEY = "TASKSET";
+<script>
+  const RESOURCE_KEY = "RESOURCES";
+  const TASKSET_KEY = "TASKSET";
 
-    function storeElementInSession(element, sessionItemKey) {
-      var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+  // initialize the materialize selector
+  document.addEventListener('DOMContentLoaded', function () {
+    var elems = document.querySelectorAll('select');
+    console.log(elems);
+    var instances = M.FormSelect.init(elems);
+  });
 
-      if (!sessionArray) {
-        sessionArray = [];
-      }
+  function storeElementInSession(element, sessionItemKey) {
+    var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
 
-      sessionArray.push(element);
-      sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
-
-      updateTable(sessionItemKey);
+    if (!sessionArray) {
+      sessionArray = [];
     }
 
-    function deleteElementFromSession(index, sessionItemKey) {
-      if (typeof index !== 'number' || isNaN(index)) {
-        console.error("No index provided, couldn't delete element: ", index);
-        return;
-      }
+    sessionArray.push(element);
+    sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
 
-      var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
-      sessionArray.splice(index, 1);
-      sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
+    updateTable(sessionItemKey);
+  }
 
-      updateTable(sessionItemKey);
+  function deleteElementFromSession(index, sessionItemKey) {
+    if (typeof index !== 'number' || isNaN(index)) {
+      console.error("No index provided, couldn't delete element: ", index);
+      return;
     }
 
-    function updateTable(sessionItemKey) {
-      var elementId;
+    var sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
+    sessionArray.splice(index, 1);
+    sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
 
-      if (sessionItemKey === RESOURCE_KEY) {
-        elementId = "resource_table";
-      } else if (sessionItemKey === TASKSET_KEY) {
-        elementId = "task_table";
-      }
+    updateTable(sessionItemKey);
+  }
 
-      if (!elementId) {
-        console.error("No elementId could be found, no table updated. The following sessionItemKey was provided: ", sessionItemKey);
-        return;
-      }
+  function updateTable(sessionItemKey) {
+    var elementId;
 
-      const table = document.getElementById(elementId);
-      const sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
-
-      updateHiddenFormField(sessionItemKey, JSON.stringify(sessionArray));
-
-      table.innerHTML = "";
-
-      if (sessionItemKey === RESOURCE_KEY) {
-        populateResourceTable(table, sessionArray);
-      } else if (sessionItemKey === TASKSET_KEY) {
-        populateTasksTable(table, sessionArray);
-      }
+    if (sessionItemKey === RESOURCE_KEY) {
+      elementId = "resource_table";
+    } else if (sessionItemKey === TASKSET_KEY) {
+      elementId = "task_table";
     }
 
-    function updateHiddenFormField(sessionItemKey, fieldValue) {
-      var elementId;
-
-      if (sessionItemKey === RESOURCE_KEY) {
-        elementId = "resources_hidden_input";
-      } else if (sessionItemKey === TASKSET_KEY) {
-        elementId = "tasks_hidden_input";
-      }
-
-      if (!elementId) {
-        console.error("No elementId could be found, no hidden form field updated. The following sessionItemKey was provided: ", sessionItemKey);
-        return;
-      }
-
-      const hidden_field = document.getElementById(elementId);
-
-      if (hidden_field)
-        hidden_field.value = fieldValue;
+    if (!elementId) {
+      console.error("No elementId could be found, no table updated. The following sessionItemKey was provided: ", sessionItemKey);
+      return;
     }
 
-    function createTask() {
-      const task_name = document.getElementById('task_name').value;
-      const task_start = document.getElementById('task_start').value;
-      const task_wcet = document.getElementById('task_wcet').value;
-      const task_period = document.getElementById('task_min_period').value;
-      const task_deadline = document.getElementById('task_deadline').value;
-      const task_fps_priority = document.getElementById('task_fps_priority').value;
+    const table = document.getElementById(elementId);
+    const sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
 
-      storeElementInSession({ name: task_name, start: task_start, wcet: task_wcet, period: task_period, deadline: task_deadline, fps_priority: task_fps_priority }, TASKSET_KEY);
+    updateHiddenFormField(sessionItemKey, JSON.stringify(sessionArray));
+
+    table.innerHTML = "";
+
+    if (sessionItemKey === RESOURCE_KEY) {
+      populateResourceTable(table, sessionArray);
+    } else if (sessionItemKey === TASKSET_KEY) {
+      populateTasksTable(table, sessionArray);
+    }
+  }
+
+  function updateHiddenFormField(sessionItemKey, fieldValue) {
+    var elementId;
+
+    if (sessionItemKey === RESOURCE_KEY) {
+      elementId = "resources_hidden_input";
+    } else if (sessionItemKey === TASKSET_KEY) {
+      elementId = "tasks_hidden_input";
     }
 
-    function createResource() {
-      const resource_name = document.getElementById('resource_name').value;
-
-      storeElementInSession(resource_name, RESOURCE_KEY);
+    if (!elementId) {
+      console.error("No elementId could be found, no hidden form field updated. The following sessionItemKey was provided: ", sessionItemKey);
+      return;
     }
 
-    function populateResourceTable(table, sessionArray) {
-      var header_row = table.insertRow(0);
+    const hidden_field = document.getElementById(elementId);
 
-      var header_cell_name = header_row.insertCell();
-      var header_cell_actions = header_row.insertCell();
+    if (hidden_field)
+      hidden_field.value = fieldValue;
+  }
 
-      header_cell_name.innerHTML = "Resource Name";
-      header_cell_actions.innerHTML = "Actions";
+  function createTask() {
+    const task_name = document.getElementById('task_name').value;
+    const task_start = document.getElementById('task_start').value;
+    const task_wcet = document.getElementById('task_wcet').value;
+    const task_period = document.getElementById('task_min_period').value;
+    const task_deadline = document.getElementById('task_deadline').value;
+    const task_fps_priority = document.getElementById('task_fps_priority').value;
 
-      var i = 0;
-      sessionArray?.forEach(resource => {
-        var row = table.insertRow(1);
-        var cell_name = row.insertCell();
-        var cell_actions = row.insertCell();
+    storeElementInSession({ name: task_name, start: task_start, wcet: task_wcet, period: task_period, deadline: task_deadline, fps_priority: task_fps_priority }, TASKSET_KEY);
+  }
 
-        cell_name.innerHTML = resource;
-        cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${RESOURCE_KEY}')" type="button">remove resource</button>`;
+  function createResource() {
+    const resource_name = document.getElementById('resource_name').value;
 
-        i++;
-      })
+    storeElementInSession(resource_name, RESOURCE_KEY);
+  }
+
+  function populateResourceTable(table, sessionArray) {
+    var header_row = table.insertRow(0);
+
+    var header_cell_name = header_row.insertCell();
+    var header_cell_actions = header_row.insertCell();
+
+    header_cell_name.innerHTML = "Resource Name";
+    header_cell_actions.innerHTML = "Actions";
+
+    var i = 0;
+    sessionArray?.forEach(resource => {
+      var row = table.insertRow(1);
+      var cell_name = row.insertCell();
+      var cell_actions = row.insertCell();
+
+      cell_name.innerHTML = resource;
+      cell_actions.innerHTML = `<button class="btn waves-effect waves-light red" onclick="deleteElementFromSession(${i},'${RESOURCE_KEY}')" type="button class="btn waves-effect waves-light"">remove resource</button class="btn waves-effect waves-light">`;
+
+      i++;
+    })
+  }
+
+  function populateTasksTable(table, sessionArray) {
+    var header_row = task_table.insertRow(0);
+
+    var header_cell_name = header_row.insertCell();
+    var header_cell_start = header_row.insertCell();
+    var header_cell_wcet = header_row.insertCell();
+    var header_cell_period = header_row.insertCell();
+    var header_cell_deadline = header_row.insertCell();
+    var header_cell_fps_priority = header_row.insertCell();
+    var header_cell_actions = header_row.insertCell();
+
+    header_cell_name.innerHTML = "Task Name";
+    header_cell_start.innerHTML = "Starting Point"
+    header_cell_wcet.innerHTML = "WCET";
+    header_cell_period.innerHTML = "Minimal Period";
+    header_cell_deadline.innerHTML = "Deadline";
+    header_cell_fps_priority.innerHTML = "Priority";
+    header_cell_actions.innerHTML = "Actions";
+
+    var i = 0;
+    sessionArray?.forEach(task => {
+      var row = task_table.insertRow(1);
+
+      var cell_name = row.insertCell();
+      var cell_start = row.insertCell();
+      var cell_wcet = row.insertCell();
+      var cell_period = row.insertCell();
+      var cell_deadline = row.insertCell();
+      var cell_fps_priority = row.insertCell();
+      var cell_actions = row.insertCell();
+
+      cell_name.innerHTML = task.name;
+      cell_start.innerHTML = task.start;
+      cell_wcet.innerHTML = task.wcet;
+      cell_period.innerHTML = task.period;
+      cell_deadline.innerHTML = task.deadline;
+      cell_fps_priority.innerHTML = task.fps_priority ? task.fps_priority : "None";
+
+      cell_actions.innerHTML = `<button class="btn waves-effect waves-light red" onclick="deleteElementFromSession(${i},'${TASKSET_KEY}')">remove task</button class="btn waves-effect waves-light">`;
+
+      i++;
+    })
+  }
+
+  function toggleResourceElements() {
+    const isResourceToggleChecked = document.getElementById('resources_activated').checked;
+    document.getElementsByName('resource_setting').forEach(e => {
+      e.style.display = isResourceToggleChecked ? "block" : "none";
+    })
+  }
+
+  function toggleFPSElements() {
+    const isFPSSelected = document.getElementById('algorithms').value === "fps";
+    document.getElementsByName('fps_setting').forEach(e => {
+      e.style.display = isFPSSelected ? "block" : "none";
+    })
+  }
+
+  function collectFormData() {
+    const resourcesActivated = document.getElementById('resources_activated').checked;
+    const algorithm = document.getElementById('algorithms').value;
+
+    const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
+    const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
+
+    const formData = {
+      resources_activated: resourcesActivated,
+      algorithm: algorithm,
+      resources: resources,
+      tasks: tasks,
+    };
+
+    return formData;
+  }
+
+  async function sendFormData() {
+    const formData = collectFormData();
+
+    try {
+      fetch("/setups/new", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(response => {
+        if (response.redirected) {
+          window.location.href = response.url; // Let browser load the full page
+        }
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while sending data to the server.');
     }
+  }
 
-    function populateTasksTable(table, sessionArray) {
-      var header_row = task_table.insertRow(0);
-
-      var header_cell_name = header_row.insertCell();
-      var header_cell_start = header_row.insertCell();
-      var header_cell_wcet = header_row.insertCell();
-      var header_cell_period = header_row.insertCell();
-      var header_cell_deadline = header_row.insertCell();
-      var header_cell_fps_priority = header_row.insertCell();
-      var header_cell_actions = header_row.insertCell();
-
-      header_cell_name.innerHTML = "Task Name";
-      header_cell_start.innerHTML = "Starting Point"
-      header_cell_wcet.innerHTML = "WCET";
-      header_cell_period.innerHTML = "Minimal Period";
-      header_cell_deadline.innerHTML = "Deadline";
-      header_cell_fps_priority.innerHTML = "Priority";
-      header_cell_actions.innerHTML = "Actions";
-
-      var i = 0;
-      sessionArray?.forEach(task => {
-        var row = task_table.insertRow(1);
-
-        var cell_name = row.insertCell();
-        var cell_start = row.insertCell();
-        var cell_wcet = row.insertCell();
-        var cell_period = row.insertCell();
-        var cell_deadline = row.insertCell();
-        var cell_fps_priority = row.insertCell();
-        var cell_actions = row.insertCell();
-
-        cell_name.innerHTML = task.name;
-        cell_start.innerHTML = task.start;
-        cell_wcet.innerHTML = task.wcet;
-        cell_period.innerHTML = task.period;
-        cell_deadline.innerHTML = task.deadline;
-        cell_fps_priority.innerHTML = task.fps_priority ? task.fps_priority : "None";
-
-        cell_actions.innerHTML = `<button onclick="deleteElementFromSession(${i},'${TASKSET_KEY}')">remove task</button>`;
-
-        i++;
-      })
-    }
-
-    function toggleResourceElements() {
-      const isResourceToggleChecked = document.getElementById('resources_activated').checked;
-      document.getElementsByName('resource_setting').forEach(e => {
-        e.style.display = isResourceToggleChecked ? "block" : "none";
-      })
-    }
-
-    function toggleFPSElements() {
-      const isFPSSelected = document.getElementById('algorithms').value === "fps";
-      document.getElementsByName('fps_setting').forEach(e => {
-        e.style.display = isFPSSelected ? "block" : "none";
-      })
-    }
-
-    function collectFormData() {
-      const resourcesActivated = document.getElementById('resources_activated').checked;
-      const algorithm = document.getElementById('algorithms').value;
-
-      const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
-      const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
-
-      const formData = {
-        resources_activated: resourcesActivated,
-        algorithm: algorithm,
-        resources: resources,
-        tasks: tasks,
-      };
-
-      return formData;
-    }
-
-    async function sendFormData() {
-      const formData = collectFormData();
-
-      try {
-        fetch("/setups/new", {
-          method: "POST",
-          body: JSON.stringify(formData),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }).then(response => {
-          if (response.redirected) {
-            window.location.href = response.url; // Let browser load the full page
-          }
-        });
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while sending data to the server.');
-      }
-    }
-
-    window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
-    window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
-    window.addEventListener("DOMContentLoaded", () => toggleFPSElements());
-    window.addEventListener("DOMContentLoaded", () => toggleResourceElements());
-  </script>
+  window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
+  window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
+  window.addEventListener("DOMContentLoaded", () => toggleFPSElements());
+  window.addEventListener("DOMContentLoaded", () => toggleResourceElements());
+</script>
 {% endblock %}

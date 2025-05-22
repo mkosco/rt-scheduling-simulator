@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h1>{% block title %}Result{% endblock %}</h1>
+    {% block title %}Result{% endblock %}
 {% endblock %}
 
 {% block content %}
@@ -35,7 +35,7 @@
     schedulable = missingJobs.length === 0
 
     document.getElementById('result-text').innerText = `The Taskset is ${ schedulable ? '' : 'not'} schedulable with ${data.algorithm}.`;
-    
+
     // Get task names from the tasks list in the JSON
     const taskNames = data.tasks.map(task => task.name);
 
