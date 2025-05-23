@@ -22,18 +22,34 @@
 
   function populateFilenameTable() {
     const table = document.getElementById('filenames_table');
-    filenames_json.forEach(element => {
+    filenames_json.forEach(filename => {
       var row = table.insertRow();
       var cell_filename = row.insertCell();
       var cell_actions = row.insertCell();
 
-      cell_filename.innerHTML = element;
+      cell_filename.innerHTML = filename;
       cell_actions.innerHTML = `
         <button class="btn waves-effect waves-light blue lighten-1">Download</button>
-        <button class="btn waves-effect waves-light red">Delete</button>
+        <button class="btn waves-effect waves-light red" onclick="deleteFile('${filename}')">Delete</button>
       `;
 
     });
+  }
+
+  function deleteFile(filename) {
+    console.log(filename);
+    try {
+      fetch(`/setups/delete/${filename}`, {
+        method: "DELETE",
+      }).then(response => {
+        if (response.redirected) {
+          window.location.href = response.url; // Let browser load the full page
+        }
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while sending data to the server.');
+    }
   }
 
   window.addEventListener("DOMContentLoaded", () => populateFilenameTable());

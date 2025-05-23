@@ -18,6 +18,13 @@ def list_setups():
         filenames = os.listdir(setup_folder_path)
         return render_template('/sim/setup/list_setups.html', filenames=filenames)
 
+@bp.route('/delete/<string:filename>', methods=['DELETE']) # type: ignore
+def delete_setup(filename):
+    if request.method == 'DELETE':
+        os.remove(f"{setup_folder_path}/{filename}")
+        
+    return redirect(url_for('setups.list_setups'))
+
 @bp.route('/result/<string:result_id>', methods=['GET'])
 def view_result(result_id: str):
     with open(f"{result_folder_path}/rt-scheduling-simulator-result_{result_id}.json") as f:
