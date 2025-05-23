@@ -11,15 +11,26 @@
 </p>
 
 <div class="row">
-    <a href="{{ url_for('setups.create_setup') }}">
-        <button class="btn waves-effect waves-light green lighten-1">Start a new Simulation</button
-            class="btn waves-effect waves-light">
-    </a>
+    <div class="col">
+        <a href="{{ url_for('setups.create_setup') }}">
+            <button class="btn waves-effect waves-light green lighten-1">Create new Setup</button
+                class="btn waves-effect waves-light">
+        </a>
+    </div>
 
-</div>
+    <div class="col">
+        <a href="{{ url_for('setups.list_setups') }}">
+            <button class="btn waves-effect waves-light orange lighten-1">View Setups</button
+                class="btn waves-effect waves-light">
+        </a>
+    </div>
 
-<div class="row">
-    <button class="btn waves-effect waves-light green lighten-1">Visualize past Results</button
-        class="btn waves-effect waves-light">
+
+    <div class="col">
+        <a>
+            <button class="btn waves-effect waves-light orange lighten-1">View Results</button
+                class="btn waves-effect waves-light">
+        </a>
+    </div>
 </div>
 {% endblock %}

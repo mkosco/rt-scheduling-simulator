@@ -1,22 +1,41 @@
-<style>
-  table {
-    border-collapse: collapse;
-    width: 50%;
-  }
-
-  td,
-  th {
-    border: 1px solid black;
-    padding: 8px;
-  }
-</style>
-
 {% extends 'base.html' %}
 
 {% block header %}
-<h1>{% block title %}Setups{% endblock %}</h1>
+{% block title %}Setups{% endblock %}
 {% endblock %}
 
 {% block content %}
 <!-- TODO create setup list -->
+
+<table id="filenames_table" class="highlight centered">
+  <thead>
+    <th>Filename</th>
+    <th></th>
+  </thead>
+</table>
+
+{% endblock %}
+
+{% block JavaScript %}
+<script>
+  const filenames_json = {{ filenames | tojson | safe }};
+
+  function populateFilenameTable() {
+    const table = document.getElementById('filenames_table');
+    filenames_json.forEach(element => {
+      var row = table.insertRow();
+      var cell_filename = row.insertCell();
+      var cell_actions = row.insertCell();
+
+      cell_filename.innerHTML = element;
+      cell_actions.innerHTML = `
+        <button class="btn waves-effect waves-light blue lighten-1">Download</button>
+        <button class="btn waves-effect waves-light red">Delete</button>
+      `;
+
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", () => populateFilenameTable());
+</script>
 {% endblock %}

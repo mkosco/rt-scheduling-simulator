@@ -12,10 +12,11 @@ setup_folder_path = os.path.join(os.getcwd(), 'data/sim_setup_files')
 result_folder_path = os.path.join(os.getcwd(), 'data/sim_result_files')
 
 
-@bp.route('/list', methods=['GET'])
+@bp.route('/list', methods=['GET']) # type: ignore
 def list_setups():
     if request.method == 'GET':
-        return render_template('/sim/setup/list_setups.html')
+        filenames = os.listdir(setup_folder_path)
+        return render_template('/sim/setup/list_setups.html', filenames=filenames)
 
 @bp.route('/result/<string:result_id>', methods=['GET'])
 def view_result(result_id: str):
@@ -23,7 +24,7 @@ def view_result(result_id: str):
         data = json.load(f)
     return render_template("sim/result.html", chart_data=data)
 
-@bp.route('/new', methods=['GET', 'POST'])
+@bp.route('/new', methods=['GET', 'POST']) # type: ignore
 def create_setup():
     if request.method == 'GET':
         return render_template('/sim/setup/create_setup.html')
