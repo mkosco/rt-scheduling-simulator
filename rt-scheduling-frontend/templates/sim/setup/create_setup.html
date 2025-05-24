@@ -6,6 +6,13 @@
 
 {% block content %}
 <div class="section">
+  <div class="input-field">
+    <input type="text" id="setup_name" name="setup_name" />
+    <label for="setup_name">Setup Name</label>
+  </div>
+</div>
+
+<div class="section">
   <h4>Settings</h4>
 
   <!-- Resources Checkbox -->
@@ -62,7 +69,8 @@
         <label for="resource_name">Resource Name</label>
       </div>
       <div class="input-field col">
-        <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add Resource</button>
+        <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add
+          Resource</button>
       </div>
     </div>
     <!-- TODO display some special text when table is empty -->
@@ -300,6 +308,7 @@
   }
 
   function collectFormData() {
+    const setupName = document.getElementById('setup_name').value;
     const resourcesActivated = document.getElementById('resources_activated').checked;
     const algorithm = document.getElementById('algorithms').value;
 
@@ -307,6 +316,7 @@
     const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
 
     const formData = {
+      setup_name: setupName,
       resources_activated: resourcesActivated,
       algorithm: algorithm,
       resources: resources,

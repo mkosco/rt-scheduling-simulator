@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-{% block title %}Setups{% endblock %}
+{% block title %}Results{% endblock %}
 {% endblock %}
 
 {% block content %}
@@ -19,6 +19,8 @@
 {% block JavaScript %}
 <script>
   const fileinfo_json = {{ fileinfo | tojson | safe }};
+
+  console.log(fileinfo_json);
 
   function populateFilenameTable() {
     const table = document.getElementById('filenames_table');
@@ -39,7 +41,7 @@
   function deleteFile(filename) {
     console.log("delete: " + filename);
     try {
-      fetch(`/setups/delete/${filename}`, {
+      fetch(`/results/delete/${filename}`, {
         method: "DELETE",
       }).then(response => {
         if (response.redirected) {
@@ -54,7 +56,7 @@
 
   function downloadFile(filename) {
     console.log("download: " + filename);
-    fetch(`/setups/download/${filename}`, {
+    fetch(`/results/download/${filename}`, {
       method: "GET",
     })
       .then(response => {
