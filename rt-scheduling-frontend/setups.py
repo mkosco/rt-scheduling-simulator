@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, redirect, render_template, request, jsonify, flash, current_app, url_for
+    Blueprint, abort, redirect, render_template, request, jsonify, flash, current_app, send_from_directory, url_for
 )
 import os
 import json
@@ -24,6 +24,15 @@ def delete_setup(filename):
         os.remove(f"{setup_folder_path}/{filename}")
         
     return redirect(url_for('setups.list_setups'))
+
+
+@bp.route('/download/<string:filename>', methods=['GET']) # type: ignore
+def download_setup(filename):
+    if request.method == 'GET':
+        try:
+            return send_from_directory(setup_folder_path, filename, as_attachment=True)
+        except FileNotFoundError:
+            abort(404)
 
 @bp.route('/result/<string:result_id>', methods=['GET'])
 def view_result(result_id: str):
@@ -68,7 +77,6 @@ def create_setup():
                 text=True
             )
             
-
             # Check the result of the subprocess
             if result.returncode != 0:
                 current_app.logger.error(f"simulation runner failed: {result.stderr}")

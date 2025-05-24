@@ -29,7 +29,7 @@
 
       cell_filename.innerHTML = filename;
       cell_actions.innerHTML = `
-        <button class="btn waves-effect waves-light blue lighten-1">Download</button>
+        <button class="btn waves-effect waves-light blue lighten-1" onclick="downloadFile('${filename}')">Download</button>
         <button class="btn waves-effect waves-light red" onclick="deleteFile('${filename}')">Delete</button>
       `;
 
@@ -37,7 +37,7 @@
   }
 
   function deleteFile(filename) {
-    console.log(filename);
+    console.log("delete: " + filename);
     try {
       fetch(`/setups/delete/${filename}`, {
         method: "DELETE",
@@ -50,6 +50,33 @@
       console.error('Error:', error);
       alert('An error occurred while sending data to the server.');
     }
+  }
+
+  function downloadFile(filename) {
+    console.log("download: " + filename);
+    fetch(`/setups/download/${filename}`, {
+      method: "GET",
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while downloading the file.');
+      });
   }
 
   window.addEventListener("DOMContentLoaded", () => populateFilenameTable());
