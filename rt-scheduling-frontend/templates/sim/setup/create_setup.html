@@ -60,24 +60,24 @@
 </div>
 
 
-<div class="section">
-  <div name="resource_setting">
-    <h4>Resources</h4>
-    <div class="row">
-      <div class="input-field col">
-        <input type="text" id="resource_name" />
-        <label for="resource_name">Resource Name</label>
-      </div>
-      <div class="input-field col">
-        <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add
-          Resource</button>
-      </div>
+<!-- Resource section -->
+<div class="section" name="resource_setting">
+  <h4>Resources</h4>
+  <div class="row">
+    <div class="input-field col">
+      <input type="text" id="resource_name" />
+      <label for="resource_name">Resource Name</label>
     </div>
-    <!-- TODO display some special text when table is empty -->
-    <table id="resource_table" class="highlight"></table>
+    <div class="input-field col">
+      <button class="btn waves-effect waves-light green lighten-1" onclick="createResource()" type="button">Add
+        Resource</button>
+    </div>
   </div>
+  <!-- TODO display some special text when table is empty -->
+  <table id="resource_table" class="highlight"></table>
 </div>
 
+<!-- Task section -->
 <div class="section">
   <h4>Taskset</h4>
   <div class="row">
@@ -120,7 +120,8 @@
   <table id="task_table" class="highlight"></table>
 </div>
 
-<div class="section">
+<!-- Resource Assignment section -->
+<div class="section" name="resource_setting">
   <h4>Resource Assignment</h4>
   <div class="row">
     <div class="input-field col">
@@ -147,8 +148,8 @@
     </div>
 
     <div class="input-field col">
-      <button class="btn waves-effect waves-light green lighten-1" onclick="createAssignment()"
-        type="button">Create Resource Assignment</button class="btn waves-effect waves-light">
+      <button class="btn waves-effect waves-light green lighten-1" onclick="createAssignment()" type="button">Create
+        Resource Assignment</button class="btn waves-effect waves-light">
     </div>
   </div>
 
@@ -187,7 +188,7 @@
     if (sessionItemKey === TASKSET_KEY) {
       populateResourceAssignmentTaskSelect();
     }
-     if (sessionItemKey === RESOURCE_KEY) {
+    if (sessionItemKey === RESOURCE_KEY) {
       populateResourceAssignmentResourceSelect();
     }
   }
@@ -230,8 +231,6 @@
     const table = document.getElementById(elementId);
     const sessionArray = JSON.parse(sessionStorage.getItem(sessionItemKey));
 
-    updateHiddenFormField(sessionItemKey, JSON.stringify(sessionArray));
-
     table.innerHTML = "";
 
     if (sessionItemKey === RESOURCE_KEY) {
@@ -241,28 +240,6 @@
     } else if (sessionItemKey === ASSIGNMENT_KEY) {
       populateResourceAssignmentTable(table, sessionArray);
     }
-  }
-
-  function updateHiddenFormField(sessionItemKey, fieldValue) {
-    var elementId;
-
-    if (sessionItemKey === RESOURCE_KEY) {
-      elementId = "resources_hidden_input";
-    } else if (sessionItemKey === TASKSET_KEY) {
-      elementId = "tasks_hidden_input";
-    } else if (sessionItemKey === ASSIGNMENT_KEY) {
-      elementId = "resource_assignment_table";
-    }
-
-    if (!elementId) {
-      console.error("No elementId could be found, no hidden form field updated. The following sessionItemKey was provided: ", sessionItemKey);
-      return;
-    }
-
-    const hidden_field = document.getElementById(elementId);
-
-    if (hidden_field)
-      hidden_field.value = fieldValue;
   }
 
   function createTask() {
@@ -288,7 +265,7 @@
     const start = document.getElementById('resource_start').value;
     const end = document.getElementById('resource_end').value;
 
-    storeElementInSession({task: task, resource: resource, start: start, end: end}, ASSIGNMENT_KEY);
+    storeElementInSession({ task: task, resource: resource, start: start, end: end }, ASSIGNMENT_KEY);
   }
 
   function populateResourceTable(table, sessionArray) {
@@ -484,7 +461,7 @@
 
   window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
   window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
-    window.addEventListener("DOMContentLoaded", () => updateTable(ASSIGNMENT_KEY));
+  window.addEventListener("DOMContentLoaded", () => updateTable(ASSIGNMENT_KEY));
   window.addEventListener("DOMContentLoaded", () => toggleFPSElements());
   window.addEventListener("DOMContentLoaded", () => toggleResourceElements());
   window.addEventListener("DOMContentLoaded", () => populateResourceAssignmentTaskSelect());
