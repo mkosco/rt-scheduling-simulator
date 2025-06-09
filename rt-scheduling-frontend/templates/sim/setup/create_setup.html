@@ -424,8 +424,9 @@
     const resourcesActivated = document.getElementById('resources_activated').checked;
     const algorithm = document.getElementById('algorithms').value;
 
-    const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
-    const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
+    const resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY)) || [];
+    const tasks = JSON.parse(sessionStorage.getItem(TASKSET_KEY)) || [];
+    const assignments = JSON.parse(sessionStorage.getItem(ASSIGNMENT_KEY)) || [];
 
     const formData = {
       setup_name: setupName,
@@ -433,6 +434,7 @@
       algorithm: algorithm,
       resources: resources,
       tasks: tasks,
+      assignments: assignments,
     };
 
     return formData;

@@ -61,6 +61,7 @@ def create_setup():
                 flash('No JSON data was recieved!')
                 return jsonify({'error': 'No JSON data was received!'}), 400
 
+            current_app.logger.debug(data)
             current_app.logger.debug(f"folder path for sim setup file storage: {setup_folder_path}")
             
             # Ensure the folder exists
