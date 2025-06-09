@@ -120,6 +120,42 @@
   <table id="task_table" class="highlight"></table>
 </div>
 
+<div class="section">
+  <h4>Resource Assignment</h4>
+  <div class="row">
+    <div class="input-field col">
+      <select id="resource_assignment_task">
+      </select>
+      <label for="resource_assignment_task">Task</label>
+    </div>
+
+    <div class="input-field col">
+      <select id="resource_assignment_resource">
+      </select>
+      <label for="resource_assignment_resource">Resource</label>
+    </div>
+
+
+    <div class="input-field col">
+      <input type="number" id="resource_start" />
+      <label for="resource_start">Resource Start</label>
+    </div>
+
+    <div class="input-field col">
+      <input type="number" id="resource_end" />
+      <label for="resource_end">Resource End</label>
+    </div>
+
+    <div class="input-field col">
+      <button class="btn waves-effect waves-light green lighten-1" onclick="createAssignment()"
+        type="button">Create Resource Assignment</button class="btn waves-effect waves-light">
+    </div>
+  </div>
+
+  <!-- TODO display some special text when table is empty -->
+  <table id="resource_assignment_table" class="highlight"></table>
+</div>
+
 <button class="btn waves-effect waves-light green lighten-1" type="button" onclick="sendFormData()">Run
   Simulation</button class="btn waves-effect waves-light">
 {% endblock %}
@@ -128,6 +164,7 @@
 <script>
   const RESOURCE_KEY = "RESOURCES";
   const TASKSET_KEY = "TASKSET";
+  const ASSIGNMENT_KEY = "ASSIGNMENT";
 
   // initialize the materialize selector
   document.addEventListener('DOMContentLoaded', function () {
@@ -147,6 +184,12 @@
     sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
 
     updateTable(sessionItemKey);
+    if (sessionItemKey === TASKSET_KEY) {
+      populateResourceAssignmentTaskSelect();
+    }
+     if (sessionItemKey === RESOURCE_KEY) {
+      populateResourceAssignmentResourceSelect();
+    }
   }
 
   function deleteElementFromSession(index, sessionItemKey) {
@@ -160,6 +203,12 @@
     sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
 
     updateTable(sessionItemKey);
+    if (sessionItemKey === TASKSET_KEY) {
+      populateResourceAssignmentTaskSelect();
+    }
+    if (sessionItemKey === RESOURCE_KEY) {
+      populateResourceAssignmentResourceSelect();
+    }
   }
 
   function updateTable(sessionItemKey) {
@@ -169,6 +218,8 @@
       elementId = "resource_table";
     } else if (sessionItemKey === TASKSET_KEY) {
       elementId = "task_table";
+    } else if (sessionItemKey === ASSIGNMENT_KEY) {
+      elementId = "resource_assignment_table";
     }
 
     if (!elementId) {
@@ -187,6 +238,8 @@
       populateResourceTable(table, sessionArray);
     } else if (sessionItemKey === TASKSET_KEY) {
       populateTasksTable(table, sessionArray);
+    } else if (sessionItemKey === ASSIGNMENT_KEY) {
+      populateResourceAssignmentTable(table, sessionArray);
     }
   }
 
@@ -197,6 +250,8 @@
       elementId = "resources_hidden_input";
     } else if (sessionItemKey === TASKSET_KEY) {
       elementId = "tasks_hidden_input";
+    } else if (sessionItemKey === ASSIGNMENT_KEY) {
+      elementId = "resource_assignment_table";
     }
 
     if (!elementId) {
@@ -225,6 +280,15 @@
     const resource_name = document.getElementById('resource_name').value;
 
     storeElementInSession(resource_name, RESOURCE_KEY);
+  }
+
+  function createAssignment() {
+    const task = document.getElementById('resource_assignment_task').value;
+    const resource = document.getElementById('resource_assignment_resource').value;
+    const start = document.getElementById('resource_start').value;
+    const end = document.getElementById('resource_end').value;
+
+    storeElementInSession({task: task, resource: resource, start: start, end: end}, ASSIGNMENT_KEY);
   }
 
   function populateResourceTable(table, sessionArray) {
@@ -293,6 +357,77 @@
     })
   }
 
+  function populateResourceAssignmentTable(table, sessionArray) {
+    // Create header row
+    var header_row = table.insertRow(0);
+    var header_cell_task = header_row.insertCell();
+    var header_cell_resource = header_row.insertCell();
+    var header_cell_start = header_row.insertCell();
+    var header_cell_end = header_row.insertCell();
+    var header_cell_actions = header_row.insertCell();
+
+    header_cell_task.innerHTML = "Task Name";
+    header_cell_resource.innerHTML = "Resource Name";
+    header_cell_start.innerHTML = "Start";
+    header_cell_end.innerHTML = "End";
+    header_cell_actions.innerHTML = "Actions";
+
+    var i = 0;
+    sessionArray?.forEach(assignment => {
+      var row = table.insertRow(1);
+      var cell_task = row.insertCell();
+      var cell_resource = row.insertCell();
+      var cell_start = row.insertCell();
+      var cell_end = row.insertCell();
+      var cell_actions = row.insertCell();
+
+      cell_task.innerHTML = assignment.task;
+      cell_resource.innerHTML = assignment.resource;
+      cell_start.innerHTML = assignment.start;
+      cell_end.innerHTML = assignment.end;
+      cell_actions.innerHTML = `<button class="btn waves-effect waves-light red" onclick="deleteElementFromSession(${i},'${ASSIGNMENT_KEY}')">remove assignment</button>`;
+      i++;
+    });
+  }
+
+  function populateResourceAssignmentTaskSelect() {
+    const select = document.getElementById('resource_assignment_task');
+    // Clear existing options
+    select.innerHTML = "";
+    // Get tasks from session storage
+    const tasks = JSON.parse(sessionStorage.getItem("TASKSET")) || [];
+    // Add an option for each task
+    tasks.forEach(task => {
+      const option = document.createElement("option");
+      option.value = task.name;
+      option.text = task.name;
+      select.appendChild(option);
+    });
+    // Re-initialize Materialize select if needed
+    if (window.M && M.FormSelect) {
+      M.FormSelect.init(select);
+    }
+  }
+
+  function populateResourceAssignmentResourceSelect() {
+    const select = document.getElementById('resource_assignment_resource');
+    // Clear existing options
+    select.innerHTML = "";
+    // Get resources from session storage
+    const resources = JSON.parse(sessionStorage.getItem("RESOURCES")) || [];
+    // Add an option for each resource
+    resources.forEach(resource => {
+      const option = document.createElement("option");
+      option.value = resource;
+      option.text = resource;
+      select.appendChild(option);
+    });
+    // Re-initialize Materialize select if needed
+    if (window.M && M.FormSelect) {
+      M.FormSelect.init(select);
+    }
+  }
+
   function toggleResourceElements() {
     const isResourceToggleChecked = document.getElementById('resources_activated').checked;
     document.getElementsByName('resource_setting').forEach(e => {
@@ -349,7 +484,10 @@
 
   window.addEventListener("DOMContentLoaded", () => updateTable(RESOURCE_KEY));
   window.addEventListener("DOMContentLoaded", () => updateTable(TASKSET_KEY));
+    window.addEventListener("DOMContentLoaded", () => updateTable(ASSIGNMENT_KEY));
   window.addEventListener("DOMContentLoaded", () => toggleFPSElements());
   window.addEventListener("DOMContentLoaded", () => toggleResourceElements());
+  window.addEventListener("DOMContentLoaded", () => populateResourceAssignmentTaskSelect());
+  window.addEventListener("DOMContentLoaded", () => populateResourceAssignmentResourceSelect());
 </script>
 {% endblock %}
