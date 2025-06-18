@@ -203,6 +203,8 @@
     sessionArray.splice(index, 1);
     sessionStorage.setItem(sessionItemKey, JSON.stringify(sessionArray));
 
+    deleteDanglingResourceAssignments();
+
     updateTable(sessionItemKey);
     if (sessionItemKey === TASKSET_KEY) {
       populateResourceAssignmentTaskSelect();
@@ -210,6 +212,34 @@
     if (sessionItemKey === RESOURCE_KEY) {
       populateResourceAssignmentResourceSelect();
     }
+  }
+
+  /**
+   * This code deletes all resource assignments for which the task or resource does not exist anymore
+   */
+  function deleteDanglingResourceAssignments() {
+    var tasks = JSON.parse(sessionStorage.getItem(TASKSET_KEY));
+    var resources = JSON.parse(sessionStorage.getItem(RESOURCE_KEY));
+    var assignments = JSON.parse(sessionStorage.getItem(ASSIGNMENT_KEY));
+
+    var toDelete = []
+    assignments.forEach(assignment => {
+      if (!tasks.includes(assignment.task) || !resources.includes(assignment.resource)) {
+        toDelete.push(assignments.indexOf(assignment));
+      }
+    })
+
+    console.log(toDelete);
+
+    toDelete.forEach(index => assignments.splice(index, 1));
+
+    sessionStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(assignments));
+
+    console.log(tasks);
+    console.log(resources);
+    console.log(assignments);
+    
+    updateTable(ASSIGNMENT_KEY);
   }
 
   function updateTable(sessionItemKey) {
