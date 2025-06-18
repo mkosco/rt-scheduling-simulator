@@ -51,6 +51,8 @@ def download_setup(filename):
         except FileNotFoundError:
             abort(404)
 
+
+# TODO split this up into multiple functions and don't always automatically trigger sim, give the user the option
 @bp.route('/new', methods=['GET', 'POST']) # type: ignore
 def create_setup():
     if request.method == 'GET':
