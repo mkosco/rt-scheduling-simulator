@@ -229,16 +229,10 @@
       }
     })
 
-    console.log(toDelete);
-
     toDelete.forEach(index => assignments.splice(index, 1));
 
     sessionStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(assignments));
 
-    console.log(tasks);
-    console.log(resources);
-    console.log(assignments);
-    
     updateTable(ASSIGNMENT_KEY);
   }
 
