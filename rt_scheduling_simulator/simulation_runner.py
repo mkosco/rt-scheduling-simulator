@@ -16,21 +16,21 @@ from rt_scheduling_simulator.model.task import Task
 
 MAX_SIMULATION_TIME = 10000
 
-def pick_algorithm(algorithm_name: str, tasks: list[Task], resources: list, max_timepoint: int) -> Algorithm:
+def pick_algorithm(algorithm_name: str, tasks: list[Task], resources: list, assignments: list, max_timepoint: int) -> Algorithm:
     if algorithm_name.lower() == "edf":
-        return EDF(tasks, resources, max_timepoint)
+        return EDF(tasks, resources, assignments, max_timepoint)
     elif algorithm_name.lower() == "llf":
-        return LLF(tasks, resources, max_timepoint)
+        return LLF(tasks, resources, assignments, max_timepoint)
     elif algorithm_name.lower() == "mllf":
-        return MLLF(tasks, resources, max_timepoint)
+        return MLLF(tasks, resources, assignments, max_timepoint)
     elif algorithm_name.lower() == "rms":
-        return RMS(tasks, resources, max_timepoint)
+        return RMS(tasks, resources, assignments, max_timepoint)
     elif algorithm_name.lower() == "fps":
-        return FPS(tasks, resources, max_timepoint)
+        return FPS(tasks, resources, assignments, max_timepoint)
     else:
         # Default to EDF if algorithm not recognized
         debug_print(f"Algorithm {algorithm_name} not recognized, using EDF")
-        return EDF(tasks, resources, max_timepoint)
+        return EDF(tasks, resources, assignments, max_timepoint)
 
 def main():
     global DEBUG
@@ -51,8 +51,11 @@ def main():
             data = json.load(file)
             algorithm_name: str = data["algorithm"]
             raw_tasks = data["tasks"]
+            raw_resources = data["resources"]
+            raw_asssignments = data["assignments"]
             tasks: list[Task] = []
-            resources = data["resources"]
+
+            debug_print(f"raw assignments: {raw_asssignments}")
 
             # parse raw dict tasks into task dataclass
             for task in raw_tasks: 
@@ -85,7 +88,7 @@ def main():
             save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{result_id}.json")
             debug_print(f"folder path for the created sim result file: {save_path}")
 
-            algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=resources, max_timepoint=max_timepoint)
+            algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=raw_resources, assignments=raw_asssignments, max_timepoint=max_timepoint)
 
             algorithm.summarize()
 

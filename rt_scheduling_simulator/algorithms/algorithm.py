@@ -5,9 +5,10 @@ from rt_scheduling_simulator.model.job import Job, JobState
 from rt_scheduling_simulator.model.task import Task 
 
 class Algorithm(ABC):
-    def __init__(self, tasks: list[Task], resources, max_timepoint):
+    def __init__(self, tasks: list[Task], resources, assignments, max_timepoint):
         self.tasks = tasks
         self.resources = resources
+        self.assignments = assignments
         self.max_timepoint = max_timepoint
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
@@ -23,6 +24,7 @@ class Algorithm(ABC):
         debug_print(f"jobs: ")
         debug_pprint(self.jobs)
         debug_print(f"resources: {self.resources}")
+        debug_print(f"assignments: {self.assignments}")
         debug_print(f"max timepoint: {self.max_timepoint} \n")
 
     @abstractmethod
