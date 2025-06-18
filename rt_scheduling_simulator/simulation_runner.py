@@ -14,6 +14,8 @@ from rt_scheduling_simulator.model.algorithms.mllf import MLLF
 from rt_scheduling_simulator.model.algorithms.rms import RMS
 from rt_scheduling_simulator.model.algorithms.fps import FPS
 from rt_scheduling_simulator.model.task import Task
+from rt_scheduling_simulator.model.resource import Resource
+from rt_scheduling_simulator.model.assignment import Assignment 
 
 MAX_SIMULATION_TIME = 10000
 
@@ -51,19 +53,32 @@ def main():
         with open(argument, 'r') as file:
             data = json.load(file)
             algorithm_name: str = data["algorithm"]
+            
             raw_tasks = data["tasks"]
             raw_resources = data["resources"]
-            raw_asssignments = data["assignments"]
+            raw_assignments = data["assignments"]
+            
             tasks: list[Task] = []
+            resources: list[Resource] = []
+            assignments: list[Assignment] = []
 
-            debug_print(f"raw assignments: {raw_asssignments}")
+            debug_print(f"raw tasks: {raw_tasks}")
+            debug_print(f"raw resources: {raw_resources}")
+            debug_print(f"raw assignments: {raw_assignments}")
 
             # parse raw dict tasks into task dataclass
             for task in raw_tasks: 
                 fps_priority = int(task["fps_priority"]) if task["fps_priority"] else None
                 tasks.append(Task(name=task["name"],start=int(task["start"]),wcet=int(task["wcet"]),period=int(task["period"]),relative_deadline=int(task["deadline"]), fps_priority=fps_priority))
 
-            # TODO parse raw resources into resource dataclass
+            # parse raw resources into resource data objects
+            for resource_name in raw_resources:
+                resources.append(Resource(name=resource_name))
+
+            # parse raw assignments into assignment data objects
+            for assignment in raw_assignments:
+                assignments.append(Assignment(task_name=assignment['task'], resource_name=assignment['resource'], start=int(assignment['start']), end=int(assignment['end'])))
+
 
             debug_print(f"JSON content successfully loaded: {data}")
 
@@ -89,7 +104,7 @@ def main():
             save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{result_id}.json")
             debug_print(f"folder path for the created sim result file: {save_path}")
 
-            algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=raw_resources, assignments=raw_asssignments, max_timepoint=max_timepoint)
+            algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=resources, assignments=assignments, max_timepoint=max_timepoint)
 
             algorithm.summarize()
 

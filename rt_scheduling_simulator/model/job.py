@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from rt_scheduling_simulator.model.assignment import Assignment
+
 class JobState(str, Enum):
     INACTIVE = "inactive"
     WAITING = "waiting"
@@ -15,7 +17,7 @@ class Job:
     arrival_time: int
     execution_requirement: int
     deadline: int
-    resources: Optional[list]
+    assignments: list[Assignment]
     state: JobState
     laxity: Optional[int]
     fps_priority: Optional[int]

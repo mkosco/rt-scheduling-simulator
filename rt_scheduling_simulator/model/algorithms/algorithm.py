@@ -1,15 +1,19 @@
 from abc import ABC, abstractmethod
+import copy
 from dataclasses import asdict
 from rt_scheduling_simulator.logging import debug_pprint, debug_print
 from rt_scheduling_simulator.model.job import Job, JobState
 from rt_scheduling_simulator.model.task import Task 
+from rt_scheduling_simulator.model.assignment import Assignment 
+from rt_scheduling_simulator.model.resource import Resource 
 
 class Algorithm(ABC):
-    def __init__(self, tasks: list[Task], resources, assignments, max_timepoint):
+    def __init__(self, tasks: list[Task], resources: list[Resource], assignments: list[Assignment], max_timepoint):
         self.tasks = tasks
         self.resources = resources
         self.assignments = assignments
         self.max_timepoint = max_timepoint
+        
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
         self.result = {}
@@ -75,15 +79,24 @@ class Algorithm(ABC):
             # TODO check behaviour if division is not round
             num_jobs = int(self.max_timepoint / task.period)
             debug_print(f"number of jobs for task: {num_jobs}")
+
+            # from the total resource assignments filter out the ones relevant to this task
+            assignments_filtered_for_task = [assignment for assignment in self.assignments if assignment.task_name == task.name]
             
             for i in range(num_jobs):
+                # adjust the assignments start and end fields by the task period, essentially making it absolute times, whereas it was given by relative to task 
+                assignments_for_job = copy.deepcopy(assignments_filtered_for_task)
+                for assignment in assignments_for_job:
+                    assignment.start = assignment.start + i * task.period
+                    assignment.end = assignment.end + i * task.period
+
                 jobs.append(Job(name=f"{task.name.strip()}_j{i}",
                                 arrival_time=(task.start + i * task.period),
                                 execution_requirement=task.wcet,
                                 deadline=(task.start + i * task.period + task.relative_deadline),
                                 state=JobState.INACTIVE,
                                 laxity=None,
-                                resources=[],
+                                assignments=assignments_for_job,
                                 fps_priority=task.fps_priority,
                                 rms_priority=rms_priority))
 

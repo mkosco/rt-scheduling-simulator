@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from rt_scheduling_simulator.model.task import Task
+from rt_scheduling_simulator.model.resource import Resource
 
 @dataclass
 class Assignment:
-    task: Task
-    resource: object
+    task_name: str
+    resource_name: str
     start: int
     end: int
