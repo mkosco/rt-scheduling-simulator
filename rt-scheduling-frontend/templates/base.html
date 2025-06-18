@@ -17,12 +17,13 @@
       <a href="{{ url_for('home.home') }}" class="brand-logo">Real-Time Scheduling Simulator</a>
       <ul id="nav-mobile" class="right">
         <li><a href="{{ url_for('setups.create_setup') }}">new Sim</a></li>
-        <li><a href="{{ url_for('setups.list_setups') }}">List</a></li>
+        <li><a href="{{ url_for('setups.list_setups') }}">Setups</a></li>
+        <li><a href="{{ url_for('results.list_results') }}">Results</a></li>
       </ul>
     </div>
   </nav>
 
-  
+
   <div class="container">
     <header>
       <h3>{% block header %}{% endblock %}</h3>
