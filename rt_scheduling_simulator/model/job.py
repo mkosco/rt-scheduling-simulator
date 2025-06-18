@@ -15,6 +15,7 @@ class Job:
     arrival_time: int
     execution_requirement: int
     deadline: int
+    resources: Optional[list]
     state: JobState
     laxity: Optional[int]
     fps_priority: Optional[int]
