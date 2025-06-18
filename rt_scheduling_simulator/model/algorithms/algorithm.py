@@ -83,6 +83,7 @@ class Algorithm(ABC):
                                 deadline=(task.start + i * task.period + task.relative_deadline),
                                 state=JobState.INACTIVE,
                                 laxity=None,
+                                resources=[],
                                 fps_priority=task.fps_priority,
                                 rms_priority=rms_priority))
 

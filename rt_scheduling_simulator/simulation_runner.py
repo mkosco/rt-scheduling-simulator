@@ -4,14 +4,15 @@ import json
 import math
 import uuid
 import rt_scheduling_simulator
-from rt_scheduling_simulator.logging import DEBUG, debug_print
-from rt_scheduling_simulator.algorithms.algorithm import Algorithm
-from rt_scheduling_simulator.algorithms.edf import EDF
-from rt_scheduling_simulator.algorithms.llf import LLF
-from rt_scheduling_simulator.algorithms.mllf import MLLF
-from rt_scheduling_simulator.algorithms.rms import RMS
-from rt_scheduling_simulator.algorithms.fps import FPS
 import rt_scheduling_simulator.logging
+
+from rt_scheduling_simulator.logging import DEBUG, debug_print
+from rt_scheduling_simulator.model.algorithms.algorithm import Algorithm
+from rt_scheduling_simulator.model.algorithms.edf import EDF
+from rt_scheduling_simulator.model.algorithms.llf import LLF
+from rt_scheduling_simulator.model.algorithms.mllf import MLLF
+from rt_scheduling_simulator.model.algorithms.rms import RMS
+from rt_scheduling_simulator.model.algorithms.fps import FPS
 from rt_scheduling_simulator.model.task import Task
 
 MAX_SIMULATION_TIME = 10000

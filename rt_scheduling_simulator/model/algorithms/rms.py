@@ -1,4 +1,4 @@
-from rt_scheduling_simulator.algorithms.algorithm import Algorithm 
+from rt_scheduling_simulator.model.algorithms.algorithm import Algorithm 
 from rt_scheduling_simulator.model.job import JobState
 from rt_scheduling_simulator.logging import debug_print
 class RMS(Algorithm):
