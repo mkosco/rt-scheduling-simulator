@@ -18,6 +18,9 @@ def list_setups():
         filenames = []
         setupnames = []
 
+        # Ensure the folder exists
+        os.makedirs(setup_folder_path, exist_ok=True)
+
         for filename in os.listdir(setup_folder_path):
             filenames.append(filename)
             file_path = os.path.join(setup_folder_path, filename)

@@ -16,6 +16,9 @@ def list_results():
         filenames = []
         setupnames = []
 
+        # Ensure the folder exists
+        os.makedirs(result_folder_path, exist_ok=True)
+
         for filename in os.listdir(result_folder_path):
             filenames.append(filename)
             file_path = os.path.join(result_folder_path, filename)
@@ -26,10 +29,10 @@ def list_results():
                         setupnames.append(data['setup_name'])
 
         combined = [
-            {'filename': f, 'setup_name': s}
+        {'filename': f, 'setup_name': s}
             for f, s in zip(filenames, setupnames)
         ]
-        return render_template('/sim/setup/list_setups.html', fileinfo=combined)
+        return render_template('/sim/result/list_results.html', fileinfo=combined)
 
 @bp.route('/delete/<string:filename>', methods=['DELETE']) # type: ignore
 def delete_result(filename):
