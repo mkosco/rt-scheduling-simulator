@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import copy
 from dataclasses import asdict
+from typing import Optional
 from rt_scheduling_simulator.logging import debug_pprint, debug_print
 from rt_scheduling_simulator.model.job import Job, JobState
 from rt_scheduling_simulator.model.task import Task 
@@ -10,12 +11,13 @@ from rt_scheduling_simulator.model.resource import Resource
 class Algorithm(ABC):
     def __init__(self, tasks: list[Task], resources: list[Resource], assignments: list[Assignment], max_timepoint):
         self.tasks = tasks
-        self.resources = resources
+        self.resources: list[Resource] = resources
         self.assignments = assignments
         self.max_timepoint = max_timepoint
         
-        self.job_to_assignments = {}
-        self.jobs = self.generate_jobs()
+        # maps job names to assignments for the task that generated the job
+        self.job_to_assignments: dict[str, Optional[list[Assignment]]] = {}
+        self.jobs: list[Job] = self.generate_jobs()
         self.active_jobs: list[Job] = []
         self.result = {}
         self.result["summary"] = []
@@ -55,7 +57,7 @@ class Algorithm(ABC):
             active_job_copy = list(map(asdict, self.active_jobs))
             self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy})
 
-            picked_job.execution_requirement -= 1
+            picked_job.steps_executed += 1
             i += 1
 
     # TODO refactor out 
@@ -88,6 +90,7 @@ class Algorithm(ABC):
                 new_job: Job = Job(name=f"{task.name.strip()}_j{i}",
                                 arrival_time=(task.start + i * task.period),
                                 execution_requirement=task.wcet,
+                                steps_executed=0,
                                 deadline=(task.start + i * task.period + task.relative_deadline),
                                 state=JobState.INACTIVE,
                                 laxity=None,
@@ -117,19 +120,21 @@ class Algorithm(ABC):
         
         for job in self.jobs:
             job.state = JobState.WAITING
-            job_is_active = job.arrival_time <= current_time and current_time <= job.deadline and job.execution_requirement > 0
+            job_is_active = job.arrival_time <= current_time and current_time <= job.deadline and job.steps_executed < job.execution_requirement
 
             if job_is_active and job not in self.active_jobs:
                 job.state = JobState.WAITING
                 self.active_jobs.append(job)
             elif not job_is_active and job in self.active_jobs:
-                job.state = JobState.FINNISHED
+                job.state = JobState.FINNISHED  
 
-                if job.execution_requirement > 0:
+                if job.steps_executed != job.execution_requirement:
                     job.state = JobState.MISSED
                     debug_print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
                 self.result["summary"].append(asdict(job))
-                self.active_jobs.remove(job) 
+                self.active_jobs.remove(job)
+                
+        self.update_resources_needed()
                 
     def update_resources_needed(self) -> None:
         """
@@ -137,5 +142,17 @@ class Algorithm(ABC):
         this field tells us which resources the job needs to perform its next execution step
         """
         
-        
-        pass
+        for job in self.active_jobs:
+            for assignment in self.job_to_assignments.get(job.name):
+                job.resources_needed = []
+
+                if job.steps_executed >= assignment.start and job.steps_executed <= assignment.end:
+                    # as the assignment only stores the resource name we need to fetch the obj. matching
+                    resources = [r for r in self.resources if r.name == assignment.resource_name]
+                    
+                    if len(resources) != 1:
+                        raise ValueError("No exact match for the resource name was found!")
+                    
+                    resource = resources[0]
+                    
+                    job.resources_needed.append(resource)

@@ -16,6 +16,7 @@ class Job:
     name: str
     arrival_time: int
     execution_requirement: int
+    steps_executed: int
     deadline: int
     # describes the resources needed for the corresponding execution requirement
     resources_needed: Optional[list[Resource]]
