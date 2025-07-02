@@ -78,7 +78,8 @@
                 task: baseTaskName,
                 state: job.state,
                 jobName: job.name,
-                remaining: job.execution_requirement,
+                remaining: job.execution_requirement - job.steps_executed,
+                resources_needed: job.resources_needed, 
             });
         });
     });
@@ -145,6 +146,35 @@
             d3.select("#tooltip")
                 .style("display", "block")
                 .html(`Job: ${d.jobName} (${d.task}) with state: ${d.state}, remaining: ${d.remaining - 1}`); // TODO think the off by one through and fix it cohesively
+        })
+        .on("mousemove", function (event) {
+            d3.select("#tooltip")
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 20) + "px");
+        })
+        .on("mouseout", function () {
+            d3.select("#tooltip")
+                .style("display", "none");
+        });
+
+    // Draw orange rectangles for resources needed
+    svg.selectAll(".resource-needed")
+        .data(plotData.filter(d => d.resources_needed && d.resources_needed.length > 0))
+        .enter()
+        .append("rect")
+        .attr("class", "resource-needed")
+        .attr("x", d => x(d.timepoint) + rectWidth * 0.2)
+        .attr("y", d => y(d.task) - rectHeight * 0.2)
+        .attr("width", rectWidth * 0.6)
+        .attr("height", rectHeight * 0.4)
+        .attr("fill", "orange")
+        .attr("stroke", "#b26a00")
+        .attr("stroke-width", 0.5)
+        .on("mouseover", function (event, d) {
+            const resourceNames = d.resources_needed.map(r => r.name).join(", ");
+            d3.select("#tooltip")
+                .style("display", "block")
+                .html(`Resources needed: ${resourceNames}`);
         })
         .on("mousemove", function (event) {
             d3.select("#tooltip")
