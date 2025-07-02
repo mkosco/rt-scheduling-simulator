@@ -14,6 +14,7 @@ class Algorithm(ABC):
         self.assignments = assignments
         self.max_timepoint = max_timepoint
         
+        self.job_to_assignments = {}
         self.jobs = self.generate_jobs()
         self.active_jobs: list[Job] = []
         self.result = {}
@@ -84,24 +85,24 @@ class Algorithm(ABC):
             assignments_filtered_for_task = [assignment for assignment in self.assignments if assignment.task_name == task.name]
             
             for i in range(num_jobs):
-                # adjust the assignments start and end fields by the task period, essentially making it absolute times, whereas it was given by relative to task 
-                assignments_for_job = copy.deepcopy(assignments_filtered_for_task)
-                for assignment in assignments_for_job:
-                    assignment.start = assignment.start + i * task.period
-                    assignment.end = assignment.end + i * task.period
-
-                jobs.append(Job(name=f"{task.name.strip()}_j{i}",
+                new_job: Job = Job(name=f"{task.name.strip()}_j{i}",
                                 arrival_time=(task.start + i * task.period),
                                 execution_requirement=task.wcet,
                                 deadline=(task.start + i * task.period + task.relative_deadline),
                                 state=JobState.INACTIVE,
                                 laxity=None,
-                                assignments=assignments_for_job,
+                                resources_needed=None,
                                 fps_priority=task.fps_priority,
-                                rms_priority=rms_priority))
+                                rms_priority=rms_priority)
+                
+                jobs.append(new_job)
+                
+                self.job_to_assignments[new_job.name] = copy.deepcopy(assignments_filtered_for_task)
 
-        debug_print(f"\njobs for taskset:\n")
+        debug_print(f"\n\njobs for taskset:")
         debug_pprint(jobs)
+        debug_print(f"\n\njobs to assignments map:")
+        debug_pprint(self.job_to_assignments)
         return jobs
     
     # TODO refactor out
@@ -129,3 +130,12 @@ class Algorithm(ABC):
                     debug_print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
                 self.result["summary"].append(asdict(job))
                 self.active_jobs.remove(job) 
+                
+    def update_resources_needed(self) -> None:
+        """
+        This function updates the resources_needed field of the Job Dataclass
+        this field tells us which resources the job needs to perform its next execution step
+        """
+        
+        
+        pass
