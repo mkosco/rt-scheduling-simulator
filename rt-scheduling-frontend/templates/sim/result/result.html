@@ -146,7 +146,7 @@
         .attr("width", rectWidth)
         .attr("height", rectHeight)
         .attr("fill", d => jobColor(d.state))
-        .attr("stroke", d => d.resources_needed.length > 0 ? "orange" : "#333")
+        .attr("stroke", d => d.resources_needed.length > 0 ? "orange" : "#D3D3D3")
         .attr("stroke-width", borderWidth)        // Border thickness
         .on("mouseover", function (event, d) {
             const resourceNames = d.resources_needed.map(r => r.name).join(", ");
