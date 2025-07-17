@@ -132,7 +132,8 @@
         .call(d3.axisLeft(y));
 
     // Rectangle dimensions
-    const rectWidth = Math.abs(x(1) - x(0));
+    const borderWidth = 2;
+    const rectWidth = Math.abs(x(1) - x(0)) - borderWidth;
     const rectHeight = (taskNames.length > 1) ? Math.abs(y(taskNames[1]) - y(taskNames[0])) * 0.5 : 15;
 
     // Draw rectangles for each (timepoint, task)
@@ -140,20 +141,20 @@
         .data(plotData)
         .enter()
         .append("rect")
-        .attr("x", d => x(d.timepoint))
+        .attr("x", d => x(d.timepoint) + borderWidth)
         .attr("y", d => y(d.task) - rectHeight / 2)
         .attr("width", rectWidth)
         .attr("height", rectHeight)
         .attr("fill", d => jobColor(d.state))
-        .attr("stroke", d => d.resources_needed.length > 0 ? "orange" : "#333")           // Border color (dark gray)
-        .attr("stroke-width", 2)        // Border thickness
+        .attr("stroke", d => d.resources_needed.length > 0 ? "orange" : "#333")
+        .attr("stroke-width", borderWidth)        // Border thickness
         .on("mouseover", function (event, d) {
             const resourceNames = d.resources_needed.map(r => r.name).join(", ");
             d3.select("#tooltip")
                 .style("display", "block")
                 .html(`Job: ${d.jobName} (${d.task}) with state: ${d.state}<br>
                        Remaining: ${d.remaining - 1}<br>
-                       Resources needed: ${resourceNames}`); // TODO think the off by one through and fix it cohesively
+                       Resources needed: ${resourceNames ? resourceNames : "-"}`);
         })
         .on("mousemove", function (event) {
             d3.select("#tooltip")
