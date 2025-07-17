@@ -88,6 +88,7 @@
     function jobColor(state) {
         if (state === "executing") return "#4caf50"; // green
         if (state === "waiting") return "#e0e0e0";   // pale gray
+        if (state === "blocked") return "#e46c0a";
         return "#bdbdbd"; // fallback gray for other states
     }
 
