@@ -143,8 +143,8 @@ class Algorithm(ABC):
         """
         
         for job in self.active_jobs:
+            job.resources_needed = []
             for assignment in self.job_to_assignments.get(job.name):
-                job.resources_needed = []
 
                 if job.steps_executed >= assignment.start and job.steps_executed <= assignment.end:
                     # as the assignment only stores the resource name we need to fetch the obj. matching
