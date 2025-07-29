@@ -1,5 +1,5 @@
 from rt_scheduling_simulator.model.algorithms.algorithm import Algorithm 
-from rt_scheduling_simulator.model.job import Job, JobState
+from rt_scheduling_simulator.model.job import Job
 from rt_scheduling_simulator.logging import debug_print
 
 class FPS(Algorithm):
@@ -9,14 +9,8 @@ class FPS(Algorithm):
         pass
 
     """ 
-        This is FPS so we pick the job with the highest priority 
-
-        One is the highets priority, higher integers mean a lower priority
+    This is FPS so we sort according to the highest priority 
+    One is the highets priority, higher integers mean a lower priority
     """
-    def pick_next_job(self):
-        next_job = min(self.active_jobs, key=lambda j: j.fps_priority)
-        
-        # TODO can two task have the same priority?
-        
-        next_job.state = JobState.EXECUTING
-        return next_job
+    def sort_jobs(self) -> list[Job]:
+        return [job for job in sorted(self.active_jobs, key=lambda job: job.fps_priority)]

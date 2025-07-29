@@ -43,7 +43,7 @@ class Algorithm(ABC):
         debug_print(f"max timepoint: {self.max_timepoint} \n")
 
     @abstractmethod
-    def pick_next_job(self) -> Job:
+    def sort_jobs(self) -> list[Job]:
         pass
 
     def calculate(self) -> dict:
@@ -54,6 +54,7 @@ class Algorithm(ABC):
     
             self.update_active_jobs(i)
             
+            # no more jobs, we are done
             if not self.active_jobs:
                 return self.result
             
@@ -62,13 +63,29 @@ class Algorithm(ABC):
             
             self.update_resources_needed()
 
-            picked_job = self.pick_next_job()
-            debug_print(f"picked job: {picked_job}")
+            sorted_jobs = self.sort_jobs()
+            debug_print(f"sorted jobs: {sorted_jobs}")
 
             self.upate_resource_assignments()
+            
+            # check for deadlocks, if we catch one we finish
+            if all(job.state is JobState.BLOCKED for job in sorted_jobs):
+                return self.result             
 
+            picked_job = None
+            
+            # "pick" a job that is highest in prio and not blocked
+            for job in sorted_jobs:
+                if job.state is not JobState.BLOCKED:
+                    picked_job = job
+                    break
+
+            if picked_job is None:
+                raise ValueError("No next Job could be picked! Something went wrong")
+            
+            picked_job.state = JobState.EXECUTING
+            
             active_job_copy = list(map(asdict, self.active_jobs))
-            # figure out
             resource_to_job_serialized = {
                 resource: asdict(job) if job is not None else None
                 for resource, job in copy.deepcopy(self.resource_to_job).items()

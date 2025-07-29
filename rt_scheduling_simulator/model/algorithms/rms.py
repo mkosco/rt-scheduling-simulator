@@ -1,6 +1,7 @@
 from rt_scheduling_simulator.model.algorithms.algorithm import Algorithm 
-from rt_scheduling_simulator.model.job import JobState
+from rt_scheduling_simulator.model.job import Job
 from rt_scheduling_simulator.logging import debug_print
+
 class RMS(Algorithm):
     def summarize(self):
         debug_print(f"\nRMS")
@@ -8,13 +9,8 @@ class RMS(Algorithm):
         pass
 
     """ 
-        This is RMS so we pick the job with the smallest priority
-        The shorter the period of a task the higher the priority
+    This is RMS so we sort according to the smallest priority
+    The shorter the period of a task the higher the priority
     """
-    def pick_next_job(self):
-        next_job = min(self.active_jobs, key=lambda j: j.rms_priority)
-        
-        # TODO can two task have the same priority?
-        
-        next_job.state = JobState.EXECUTING
-        return next_job
+    def sort_jobs(self) -> list[Job]:
+        return [job for job in sorted(self.active_jobs, key=lambda job: job.rms_priority)]

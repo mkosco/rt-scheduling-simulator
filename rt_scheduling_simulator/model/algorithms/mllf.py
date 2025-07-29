@@ -13,11 +13,17 @@ class MLLF(Algorithm):
         super().summarize()
         pass
 
-    def pick_next_job(self):
-        self.update_laxity()
+    """
+    This is MLLF so we sort according to LLF 
+    with the special case that we can also prioritize the previous job in special occasions 
+    """
+    def sort_jobs(self) -> list[Job]:
+        # Survey of Real Time Scheduling Algorithms
+        # laxity = deadline - current time - cpu time still needed
+        for job in self.active_jobs:
+            job.laxity = job.deadline - self.current_time - job.execution_requirement
         
-        min_laxity_job: int = min(self.active_jobs, key=lambda j: j.laxity)
-        min_laxity_jobs: list[Job] = [job for job in self.active_jobs if job.laxity == min_laxity_job.laxity]
+        min_laxity_jobs: list[Job] = [job for job in sorted(self.active_jobs, key=lambda job: job.laxity)]
         
         # find Tmin, Job with smallest deadline of all active jobs and non minimal laxity
         t_min: Optional[Job] = None
@@ -25,37 +31,26 @@ class MLLF(Algorithm):
         min_deadline_jobs = [job for job in self.active_jobs if job.laxity == min_deadline]
 
         for job in min_deadline_jobs:
-            if job.laxity > min_laxity_job.laxity:
+            if job.laxity > min_laxity_jobs[0].laxity:
                 t_min = job
 
-        """ check if rescheduling is necessary:
+        """ 
+        check if rescheduling is necessary:
             
-            Rescheduling point conditions
-                1. last task Terminates
-                2. last task uses up the time quantum or
-                3. new tasks are requested
+        Rescheduling point conditions
+            1. last task Terminates
+            2. last task uses up the time quantum or
+            3. new tasks are requested (implicitly done in the sim)
         """
         
-        """ 
-            TODO also reschedule when new tasks are available 
-            although i'm not so sure i need to check this specifically anymore,
-            as if a new task is released it is already checked in the conditions
-        """
         if self.previous_job is not None and (
             self.previous_job.state is not JobState.FINNISHED or \
             self.previous_job.execution_requirement != 0 or \
             (t_min is not None and (t_min.deadline - self.previous_job.laxity) != 0)):
-            return self.previous_job
+            # if this condition holds we need to pick the previous job if possible, therefore we put it in front
+            min_laxity_jobs.remove(self.previous_job)
+            min_laxity_jobs.insert(0, self.previous_job)
         
-        next_job = min_laxity_job
-        self.previous_job = next_job
-    
-        next_job.state = JobState.EXECUTING
-            
-        return next_job
-    
-    # Survey of Real Time Scheduling Algorithms
-    # laxity = deadline - current time - cpu time still needed
-    def update_laxity(self):
-        for job in self.active_jobs:
-            job.laxity = job.deadline - self.current_time - job.execution_requirement
+        self.previous_job = min_laxity_jobs[0]
+                
+        return min_laxity_jobs
