@@ -61,11 +61,11 @@ class Algorithm(ABC):
             debug_pprint(self.active_jobs)
             
             self.update_resources_needed()
-        
-            self.upate_resource_assignments()
 
             picked_job = self.pick_next_job()
             debug_print(f"picked job: {picked_job}")
+
+            self.upate_resource_assignments()
 
             active_job_copy = list(map(asdict, self.active_jobs))
             # figure out
@@ -177,21 +177,22 @@ class Algorithm(ABC):
     def upate_resource_assignments(self) -> None: 
         """
         This function iterates over the active jobs 
-        should the job need resources it checks wether that resource 
-        is free and assigns it when it is
+        when a job is active and needs a resource it
+        tries to assign this resource
         """
         
         # free resources that are not needed anymore or belong to jobs that are no longer active
         for resource_name, assigned_job in self.resource_to_job.items():
-            if assigned_job is not None and resource_name not in [resource.name for resource in assigned_job.resources_needed] and assigned_job not in self.active_jobs:
+            if assigned_job is not None and (resource_name not in [resource.name for resource in assigned_job.resources_needed] or assigned_job not in self.active_jobs):
                 self.resource_to_job[resource_name] = None
-        
-        
+
         # assign needed resources
         for job in self.active_jobs:
-            if job.resources_needed is not None:
+            if job.resources_needed is not None and job.state is JobState.EXECUTING:
                 for resource in job.resources_needed:
                     if self.resource_to_job[resource.name] is None:
                         self.resource_to_job[resource.name] = job
+                    elif self.resource_to_job[resource.name] is not job: 
+                        job.state = JobState.BLOCKED
                         
         debug_pprint(self.resource_to_job)
