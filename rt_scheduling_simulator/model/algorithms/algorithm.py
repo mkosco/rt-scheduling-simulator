@@ -17,12 +17,20 @@ class Algorithm(ABC):
         
         # maps job names to assignments for the task that generated the job
         self.job_to_assignments: dict[str, Optional[list[Assignment]]] = {}
+        self.resource_to_job: dict[str, Optional[Job]] = {}
         self.jobs: list[Job] = self.generate_jobs()
         self.active_jobs: list[Job] = []
         self.result = {}
         self.result["summary"] = []
         self.result["timeline"] = []
         self.current_time = 0
+        
+        # initialize resource assignment map empty
+        for resource in self.resources:
+            self.resource_to_job[resource.name] = None
+            
+        debug_pprint(self.resource_to_job)
+            
     
     @abstractmethod
     def summarize(self) -> None:
@@ -43,6 +51,7 @@ class Algorithm(ABC):
         i = 0
         while True:
             self.current_time = i
+    
             self.update_active_jobs(i)
             
             if not self.active_jobs:
@@ -50,12 +59,21 @@ class Algorithm(ABC):
             
             debug_print(f"timepoint: {i}, active jobs:")
             debug_pprint(self.active_jobs)
+            
+            self.update_resources_needed()
+        
+            self.upate_resource_assignments()
 
             picked_job = self.pick_next_job()
             debug_print(f"picked job: {picked_job}")
 
             active_job_copy = list(map(asdict, self.active_jobs))
-            self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy})
+            # figure out
+            resource_to_job_serialized = {
+                resource: asdict(job) if job is not None else None
+                for resource, job in copy.deepcopy(self.resource_to_job).items()
+            }            
+            self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy, 'resource_to_job' : resource_to_job_serialized})
 
             picked_job.steps_executed += 1
             i += 1
@@ -131,11 +149,10 @@ class Algorithm(ABC):
                 if job.steps_executed != job.execution_requirement:
                     job.state = JobState.MISSED
                     debug_print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n unfinished job: {job}")
+                
                 self.result["summary"].append(asdict(job))
                 self.active_jobs.remove(job)
-                
-        self.update_resources_needed()
-                
+                                                 
     def update_resources_needed(self) -> None:
         """
         This function updates the resources_needed field of the Job Dataclass
@@ -156,3 +173,25 @@ class Algorithm(ABC):
                     resource = resources[0]
                     
                     job.resources_needed.append(resource)
+
+    def upate_resource_assignments(self) -> None: 
+        """
+        This function iterates over the active jobs 
+        should the job need resources it checks wether that resource 
+        is free and assigns it when it is
+        """
+        
+        # free resources that are not needed anymore or belong to jobs that are no longer active
+        for resource_name, assigned_job in self.resource_to_job.items():
+            if assigned_job is not None and resource_name not in [resource.name for resource in assigned_job.resources_needed] and assigned_job not in self.active_jobs:
+                self.resource_to_job[resource_name] = None
+        
+        
+        # assign needed resources
+        for job in self.active_jobs:
+            if job.resources_needed is not None:
+                for resource in job.resources_needed:
+                    if self.resource_to_job[resource.name] is None:
+                        self.resource_to_job[resource.name] = job
+                        
+        debug_pprint(self.resource_to_job)

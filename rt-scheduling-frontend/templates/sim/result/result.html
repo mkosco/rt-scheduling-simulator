@@ -80,7 +80,8 @@
                 state: job.state,
                 jobName: job.name,
                 remaining: job.execution_requirement - job.steps_executed,
-                resources_needed: job.resources_needed, 
+                resources_needed: job.resources_needed,
+                resources_assigned: tp.resource_to_job,
             });
         });
     });
@@ -146,7 +147,17 @@
         .attr("width", rectWidth)
         .attr("height", rectHeight)
         .attr("fill", d => jobColor(d.state))
-        .attr("stroke", d => d.resources_needed.length > 0 ? "orange" : "#D3D3D3")
+        .attr("stroke", d => {
+            console.log(d.resources_assigned);
+
+            /*
+            if (Object.values(d.resources_assigned).map(val => val.name }).includes(d.jobName)) {
+                return "red";
+            }
+                */
+
+            return d.resources_needed.length > 0 ? "orange" : "#D3D3D3";
+        })
         .attr("stroke-width", borderWidth)        // Border thickness
         .on("mouseover", function (event, d) {
             const resourceNames = d.resources_needed.map(r => r.name).join(", ");
