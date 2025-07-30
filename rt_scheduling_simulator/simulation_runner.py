@@ -58,6 +58,8 @@ def main():
             raw_resources = data["resources"]
             raw_assignments = data["assignments"]
             
+            resources_activated: bool = data["resources_activated"]
+            
             tasks: list[Task] = []
             resources: list[Resource] = []
             assignments: list[Assignment] = []
@@ -71,13 +73,14 @@ def main():
                 fps_priority = int(task["fps_priority"]) if task["fps_priority"] else None
                 tasks.append(Task(name=task["name"],start=int(task["start"]),wcet=int(task["wcet"]),period=int(task["period"]),relative_deadline=int(task["deadline"]), fps_priority=fps_priority))
 
-            # parse raw resources into resource data objects
-            for resource_name in raw_resources:
-                resources.append(Resource(name=resource_name))
+            if resources_activated:
+                # parse raw resources into resource data objects
+                for resource_name in raw_resources:
+                    resources.append(Resource(name=resource_name))
 
-            # parse raw assignments into assignment data objects
-            for assignment in raw_assignments:
-                assignments.append(Assignment(task_name=assignment['task'], resource_name=assignment['resource'], start=int(assignment['start']), end=int(assignment['end'])))
+                # parse raw assignments into assignment data objects
+                for assignment in raw_assignments:
+                    assignments.append(Assignment(task_name=assignment['task'], resource_name=assignment['resource'], start=int(assignment['start']), end=int(assignment['end'])))
 
 
             debug_print(f"JSON content successfully loaded: {data}")
