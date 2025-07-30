@@ -15,6 +15,6 @@ class LLF(Algorithm):
         # Survey of Real Time Scheduling Algorithms
         # laxity = deadline - current time - cpu time still needed
         for job in self.active_jobs:
-            job.laxity = job.deadline - self.current_time - job.execution_requirement
+            job.laxity = job.deadline - self.current_time - (job.execution_requirement - job.steps_executed)
                         
         return [job for job in sorted(self.active_jobs, key=lambda job: job.laxity)]

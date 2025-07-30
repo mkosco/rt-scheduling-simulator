@@ -21,7 +21,7 @@ class MLLF(Algorithm):
         # Survey of Real Time Scheduling Algorithms
         # laxity = deadline - current time - cpu time still needed
         for job in self.active_jobs:
-            job.laxity = job.deadline - self.current_time - job.execution_requirement
+            job.laxity = job.deadline - self.current_time - (job.execution_requirement - job.steps_executed)
         
         min_laxity_jobs: list[Job] = [job for job in sorted(self.active_jobs, key=lambda job: job.laxity)]
         
@@ -43,7 +43,8 @@ class MLLF(Algorithm):
             3. new tasks are requested (implicitly done in the sim)
         """
         
-        if self.previous_job is not None and (
+        if self.previous_job is not None and \
+            self.previous_job in self.active_jobs and (
             self.previous_job.state is not JobState.FINNISHED or \
             self.previous_job.execution_requirement != 0 or \
             (t_min is not None and (t_min.deadline - self.previous_job.laxity) != 0)):
