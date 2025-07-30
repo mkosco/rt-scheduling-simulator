@@ -66,10 +66,11 @@ class Algorithm(ABC):
             sorted_jobs = self.sort_jobs()
             debug_print(f"sorted jobs: {sorted_jobs}")
 
-            self.upate_resource_assignments()
+            self.upate_resource_assignments(sorted_jobs)
             
             # check for deadlocks, if we catch one we finish
             if all(job.state is JobState.BLOCKED for job in sorted_jobs):
+                self.update_result(i)
                 return self.result             
 
             picked_job = None
@@ -85,12 +86,7 @@ class Algorithm(ABC):
             
             picked_job.state = JobState.EXECUTING
             
-            active_job_copy = list(map(asdict, self.active_jobs))
-            resource_to_job_serialized = {
-                resource: asdict(job) if job is not None else None
-                for resource, job in copy.deepcopy(self.resource_to_job).items()
-            }            
-            self.result["timeline"].append({'timepoint' : i, 'active_jobs' : active_job_copy, 'resource_to_job' : resource_to_job_serialized})
+            self.update_result(i)            
 
             picked_job.steps_executed += 1
             i += 1
@@ -191,7 +187,7 @@ class Algorithm(ABC):
                     
                     job.resources_needed.append(resource)
 
-    def upate_resource_assignments(self) -> None: 
+    def upate_resource_assignments(self, sorted_jobs) -> None: 
         """
         This function iterates over the active jobs 
         when a job is active and needs a resource it
@@ -200,12 +196,12 @@ class Algorithm(ABC):
         
         # free resources that are not needed anymore or belong to jobs that are no longer active
         for resource_name, assigned_job in self.resource_to_job.items():
-            if assigned_job is not None and (resource_name not in [resource.name for resource in assigned_job.resources_needed] or assigned_job not in self.active_jobs):
+            if assigned_job is not None and (resource_name not in [resource.name for resource in assigned_job.resources_needed] or assigned_job not in sorted_jobs):
                 self.resource_to_job[resource_name] = None
 
         # assign needed resources
-        for job in self.active_jobs:
-            if job.resources_needed is not None and job.state is JobState.EXECUTING:
+        for job in sorted_jobs:
+            if job.resources_needed is not None:
                 for resource in job.resources_needed:
                     if self.resource_to_job[resource.name] is None:
                         self.resource_to_job[resource.name] = job
@@ -213,3 +209,11 @@ class Algorithm(ABC):
                         job.state = JobState.BLOCKED
                         
         debug_pprint(self.resource_to_job)
+        
+    def update_result(self, timepoint) -> None:
+        active_job_copy = list(map(asdict, self.active_jobs))
+        resource_to_job_serialized = {
+            resource: asdict(job) if job is not None else None
+            for resource, job in copy.deepcopy(self.resource_to_job).items()
+        }            
+        self.result["timeline"].append({'timepoint' : timepoint, 'active_jobs' : active_job_copy, 'resource_to_job' : resource_to_job_serialized})
