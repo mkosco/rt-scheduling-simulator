@@ -10,6 +10,7 @@ bp = Blueprint('setups', __name__, url_prefix='/setups')
 # Define the folder path for storing JSON files
 setup_folder_path = os.path.join(os.getcwd(), 'data/sim_setup_files')
 result_folder_path = os.path.join(os.getcwd(), 'data/sim_result_files')
+EMPTY_SENTINELS = ("", None)
 
 
 @bp.route('/', methods=['GET']) # type: ignore
@@ -59,12 +60,19 @@ def create_setup():
         return render_template('/sim/setup/create_setup.html')
     if request.method == 'POST':
         try:
-            data = request.get_json()
-            current_app.logger.debug(f"setup creation request data: {data}")
+            data = request.get_json(silent=True)
+            
+            ok, info = validate_payload(
+                data,
+                required_fields=["setup_name", "resources_activated", "algorithm", "tasks"]
+            )
+            if not ok:
+                flash(message=info, category='error')
+                return jsonify(info), 400
 
-            if not data:
-                flash('No JSON data was recieved!')
-                return jsonify({'error': 'No JSON data was received!'}), 400
+            current_app.logger.debug(f"setup creation request data: {data}")            
+            
+            validate_create_form_data(data)
 
             current_app.logger.debug(data)
             current_app.logger.debug(f"folder path for sim setup file storage: {setup_folder_path}")
@@ -105,3 +113,46 @@ def create_setup():
         
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+        
+def validate_create_form_data(data):
+    if not data:
+        flash('No JSON data was recieved!')
+        return jsonify({'error': 'No JSON data was received!'}), 400
+    
+    if data.get('simulator_id') in (None, ''):
+        flash('Simulator ID must be provided!')
+        return jsonify({'error': 'Simulator ID must be provided!'}), 400
+    
+    if data.get('time_limit') in (None, ''):
+        flash('Time limit must be provided!')
+        return jsonify({'error': 'Time limit must be provided!'}), 400
+    
+    if data.get('resource_ids') in (None, ''):
+        flash('At least one resource ID must be provided!')
+        return jsonify({'error': 'At least one resource ID must be provided!'}), 400
+    
+    if data.get('task_ids') in (None, ''):
+        flash('At least one task ID must be provided!')
+        return jsonify({'error': 'At least one task ID must be provided!'}), 400
+    
+    return True, {}
+
+def is_empty(value):
+    if value in EMPTY_SENTINELS:
+        return True
+    if isinstance(value, str) and value.strip() == "":
+        return True
+    if isinstance(value, (list, dict)) and len(value) == 0:
+        return True
+    return False
+
+def validate_payload(data, required_fields: list[str]):
+    if data is None:
+        return False, "No JSON body provided"
+
+    missing = [f for f in required_fields if f not in data]
+    empty   = [f for f in required_fields if f in data and is_empty(data[f])]
+
+    if missing or empty:
+        return False, f"Invalid payload, missing: {missing}, empty: {empty}"
+    return True, ""

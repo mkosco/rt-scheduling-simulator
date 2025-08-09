@@ -478,6 +478,10 @@
         if (response.redirected) {
           window.location.href = response.url; // Let browser load the full page
         }
+        // reload page to show flashed error
+        if (response.status === 400) {
+          window.location.href = location.href;
+        }
       });
     } catch (error) {
       console.error('Error:', error);
