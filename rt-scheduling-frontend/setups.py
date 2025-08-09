@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, abort, redirect, render_template, request, jsonify, flash, current_app, send_from_directory, url_for
+    Blueprint, abort, copy_current_request_context, redirect, render_template, request, jsonify, flash, current_app, send_from_directory, url_for
 )
 import os
 import json
@@ -52,7 +52,6 @@ def download_setup(filename):
         except FileNotFoundError:
             abort(404)
 
-
 # TODO split this up into multiple functions and don't always automatically trigger sim, give the user the option
 @bp.route('/new', methods=['GET', 'POST']) # type: ignore
 def create_setup():
@@ -81,7 +80,8 @@ def create_setup():
             os.makedirs(setup_folder_path, exist_ok=True)
 
             # Define the file path for the JSON file
-            save_path = os.path.join(setup_folder_path, f"rt-scheduling-simulator-setup_{uuid.uuid4()}.json")
+            id = uuid.uuid4()
+            save_path = os.path.join(setup_folder_path, f"rt-scheduling-simulator-setup_{id}.json")
             current_app.logger.debug(f"folder path for the created sim setup file: {save_path}")
 
             # Save the JSON data to the file
@@ -104,11 +104,10 @@ def create_setup():
                 current_app.logger.error(f"simulation runner failed: {result.stderr}")
             else:
                 current_app.logger.debug(f"simulation subprocess: {result.stdout}")
-            
-            lines = result.stdout.splitlines()
-            result_id = [line.strip() for line in lines][-1]
 
-            url = url_for('results.view_result', result_id=result_id)
+            current_app.logger.debug(f"UUID: {str(id)}")
+            
+            url = url_for('results.view_result', result_id=str(id))
             return redirect(url)
         
         except Exception as e:

@@ -3,6 +3,7 @@ import sys
 import json
 import math
 import uuid
+import re
 import rt_scheduling_simulator
 import rt_scheduling_simulator.logging
 
@@ -35,6 +36,20 @@ def pick_algorithm(algorithm_name: str, tasks: list[Task], resources: list, assi
         debug_print(f"Algorithm {algorithm_name} not recognized, using EDF")
         return EDF(tasks, resources, assignments, max_timepoint)
 
+UUID_PATTERN = re.compile(r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
+
+def extract_uuid(filename: str) -> str | None:
+    """Extract the uuid from a simulator setup filename."""
+    match = UUID_PATTERN.search(filename)
+    if not match:
+        return None
+    raw = match.group(1)
+    try:
+        # Validate & normalize
+        return str(uuid.UUID(raw))
+    except ValueError:
+        return None
+
 def main():
     global DEBUG
 
@@ -43,14 +58,14 @@ def main():
         sys.argv.remove("--debug")
 
     if len(sys.argv) != 2:
-        debug_print("Usage: python simulation_runner.py <filename> [--debug]")
+        debug_print("Usage: python simulation_runner.py <filename> <uuid of setup> [--debug]")
         sys.exit(1)
 
-    argument = sys.argv[1]
-    debug_print(f"Simulation called with argument: {argument}")
+    setup_path = sys.argv[1]
+    debug_print(f"Simulation called with argument: {setup_path}")
     
     try:
-        with open(argument, 'r') as file:
+        with open(setup_path, 'r') as file:
             data = json.load(file)
             algorithm_name: str = data["algorithm"]
             
@@ -103,8 +118,13 @@ def main():
             os.makedirs(folder_path, exist_ok=True)
 
             # Define the file path for the JSON file
-            result_id = uuid.uuid4()
-            save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{result_id}.json")
+            id = extract_uuid(setup_path)
+            
+            if id is None:
+                debug_print(f"Error: Could not extract uuid from {setup_path}")
+                sys.exit(1)
+
+            save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{id}.json")
             debug_print(f"folder path for the created sim result file: {save_path}")
 
             algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=resources, assignments=assignments, max_timepoint=max_timepoint)
@@ -114,18 +134,14 @@ def main():
             # Save the JSON data to the file
             with open(save_path, 'w') as json_file:
                 data["result"] = algorithm.calculate()
-
                 json.dump(data, json_file, indent=4)
-                
-            print(result_id)
 
     except FileNotFoundError:
-        debug_print(f"Error: File '{argument}' not found.")
+        debug_print(f"Error: File '{setup_path}' not found.")
         sys.exit(1)
     except json.JSONDecodeError:
-        debug_print(f"Error: File '{argument}' is not a valid JSON file.")
+        debug_print(f"Error: File '{setup_path}' is not a valid JSON file.")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
