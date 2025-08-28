@@ -4,16 +4,18 @@ from dataclasses import asdict
 from typing import Optional
 from rt_scheduling_simulator.logging import debug_pprint, debug_print
 from rt_scheduling_simulator.model.job import Job, JobState
+from rt_scheduling_simulator.model.protocol import Protocol
 from rt_scheduling_simulator.model.task import Task 
 from rt_scheduling_simulator.model.assignment import Assignment 
 from rt_scheduling_simulator.model.resource import Resource 
 
 class Algorithm(ABC):
-    def __init__(self, tasks: list[Task], resources: list[Resource], assignments: list[Assignment], max_timepoint):
+    def __init__(self, tasks: list[Task], resources: list[Resource], assignments: list[Assignment], max_timepoint, protocol: Protocol):
         self.tasks = tasks
         self.resources: list[Resource] = resources
         self.assignments = assignments
         self.max_timepoint = max_timepoint
+        self.protocol = protocol
         
         # maps job names to assignments for the task that generated the job
         self.job_to_assignments: dict[str, Optional[list[Assignment]]] = {}
@@ -36,6 +38,7 @@ class Algorithm(ABC):
     def summarize(self) -> None:
         """This function prints a sumary of the algorithm and it's initialization"""
         debug_print(f"tasks: {self.tasks}")
+        debug_print(f"protocol: {self.protocol}")
         debug_print(f"jobs: ")
         debug_pprint(self.jobs)
         debug_print(f"resources: {self.resources}")

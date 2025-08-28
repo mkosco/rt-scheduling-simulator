@@ -14,27 +14,28 @@ from rt_scheduling_simulator.model.algorithms.llf import LLF
 from rt_scheduling_simulator.model.algorithms.mllf import MLLF
 from rt_scheduling_simulator.model.algorithms.rms import RMS
 from rt_scheduling_simulator.model.algorithms.fps import FPS
+from rt_scheduling_simulator.model.protocol import Protocol
 from rt_scheduling_simulator.model.task import Task
 from rt_scheduling_simulator.model.resource import Resource
 from rt_scheduling_simulator.model.assignment import Assignment 
 
 MAX_SIMULATION_TIME = 10000
 
-def pick_algorithm(algorithm_name: str, tasks: list[Task], resources: list, assignments: list, max_timepoint: int) -> Algorithm:
+def pick_algorithm(algorithm_name: str, tasks: list[Task], resources: list, assignments: list, max_timepoint: int, protocol: Protocol) -> Algorithm:
     if algorithm_name.lower() == "edf":
-        return EDF(tasks, resources, assignments, max_timepoint)
+        return EDF(tasks, resources, assignments, max_timepoint, protocol=protocol)
     elif algorithm_name.lower() == "llf":
-        return LLF(tasks, resources, assignments, max_timepoint)
+        return LLF(tasks, resources, assignments, max_timepoint, protocol=protocol)
     elif algorithm_name.lower() == "mllf":
-        return MLLF(tasks, resources, assignments, max_timepoint)
+        return MLLF(tasks, resources, assignments, max_timepoint, protocol=protocol)
     elif algorithm_name.lower() == "rms":
-        return RMS(tasks, resources, assignments, max_timepoint)
+        return RMS(tasks, resources, assignments, max_timepoint, protocol=protocol)
     elif algorithm_name.lower() == "fps":
-        return FPS(tasks, resources, assignments, max_timepoint)
+        return FPS(tasks, resources, assignments, max_timepoint, protocol=protocol)
     else:
         # Default to EDF if algorithm not recognized
         debug_print(f"Algorithm {algorithm_name} not recognized, using EDF")
-        return EDF(tasks, resources, assignments, max_timepoint)
+        return EDF(tasks, resources, assignments, max_timepoint, protocol=protocol)
 
 UUID_PATTERN = re.compile(r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
 
@@ -74,6 +75,7 @@ def main():
             raw_assignments = data["assignments"]
             
             resources_activated: bool = data["resources_activated"]
+            protocol: Protocol = data["protocol"] 
             
             tasks: list[Task] = []
             resources: list[Resource] = []
@@ -127,7 +129,7 @@ def main():
             save_path = os.path.join(folder_path, f"rt-scheduling-simulator-result_{id}.json")
             debug_print(f"folder path for the created sim result file: {save_path}")
 
-            algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=resources, assignments=assignments, max_timepoint=max_timepoint)
+            algorithm = pick_algorithm(algorithm_name, tasks=tasks, resources=resources, assignments=assignments, max_timepoint=max_timepoint, protocol=protocol)
 
             algorithm.summarize()
 

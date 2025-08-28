@@ -4,8 +4,8 @@ from rt_scheduling_simulator.model.job import Job, JobState
 from rt_scheduling_simulator.logging import debug_print
 
 class MLLF(Algorithm):
-    def __init__(self, tasks, resources, assignments, max_timepoint):
-        super().__init__(tasks, resources, assignments, max_timepoint)
+    def __init__(self, tasks, resources, assignments, max_timepoint, protocol):
+        super().__init__(tasks, resources, assignments, max_timepoint, protocol)
         self.previous_job: Optional[Job] = None
         
     def summarize(self):
