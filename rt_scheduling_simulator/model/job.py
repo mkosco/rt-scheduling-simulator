@@ -31,3 +31,5 @@ class Job:
     laxity: Optional[int]
     fps_priority: Optional[int]
     rms_priority: Optional[int]
+    # this priority is either set by pip or pcp
+    protocol_priority: Optional[int]
