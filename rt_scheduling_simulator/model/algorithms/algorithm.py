@@ -130,7 +130,8 @@ class Algorithm(ABC):
                                 laxity=None,
                                 resources_needed=None,
                                 fps_priority=task.fps_priority,
-                                rms_priority=rms_priority)
+                                rms_priority=rms_priority,
+                                protocol_priority=None,)
                 
                 jobs.append(new_job)
                 
