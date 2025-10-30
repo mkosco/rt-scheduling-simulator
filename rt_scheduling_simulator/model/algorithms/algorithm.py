@@ -137,6 +137,16 @@ class Algorithm(ABC):
                 
                 self.job_to_assignments[new_job.name] = copy.deepcopy(assignments_filtered_for_task)
 
+        # initialize resource priority ceilings when pcp is active
+        if self.protocol == Protocol.PCP:
+            for resource in self.resources:
+                # find all tasks that need this resource 
+                task_names_for_tasks_that_need_resource = [assignment.task_name for assignment in self.assignments if assignment.resource_name == resource.name]
+                tasks_that_need_resource = [task for task in self.tasks if task.name in task_names_for_tasks_that_need_resource]
+                
+                # assign the max priority of the tasks that need this resources as the priority ceiling
+                resource.priority_ceiling = max([task.fps_priority for task in tasks_that_need_resource])
+
         debug_print(f"\n\njobs for taskset:")
         debug_pprint(jobs)
         debug_print(f"\n\njobs to assignments map:")

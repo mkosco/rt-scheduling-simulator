@@ -93,7 +93,7 @@ def main():
             if resources_activated:
                 # parse raw resources into resource data objects
                 for resource_name in raw_resources:
-                    resources.append(Resource(name=resource_name))
+                    resources.append(Resource(name=resource_name, priority_ceiling=None))
 
                 # parse raw assignments into assignment data objects
                 for assignment in raw_assignments:
