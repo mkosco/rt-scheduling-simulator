@@ -205,7 +205,7 @@ class Algorithm(ABC):
                     
                     job.resources_needed.append(resource)
 
-    def upate_resource_assignments(self, sorted_jobs) -> None: 
+    def upate_resource_assignments(self, sorted_jobs: list[Job]) -> None: 
         """
         This function iterates over the active jobs 
         when a job is active and needs a resource it
@@ -223,6 +223,10 @@ class Algorithm(ABC):
                 for resource in job.resources_needed:
                     if self.resource_to_job[resource.name] is None:
                         self.resource_to_job[resource.name] = job
+                        
+                        # assign the resource ceiling to the job
+                        if self.protocol == Protocol.PCP:
+                            job.fps_priority = max(job.fps_priority, resource.priority_ceiling)
                     elif self.resource_to_job[resource.name] is not job: 
                         job.state = JobState.BLOCKED
                         
