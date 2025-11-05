@@ -76,6 +76,10 @@ class Algorithm(ABC):
                 self.update_result(i)
                 return self.result             
 
+            # should protocols be active resort jobs again, as the conditions might have changes
+            if self.protocol == Protocol.PIP or self.protocol == Protocol.PCP:
+                sorted_jobs = self.sort_jobs()
+
             picked_job = None
             
             # "pick" a job that is highest in prio and not blocked
