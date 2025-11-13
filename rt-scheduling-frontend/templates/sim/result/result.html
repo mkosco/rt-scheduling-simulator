@@ -81,7 +81,7 @@
                 jobName: job.name,
                 remaining: job.execution_requirement - job.steps_executed,
                 resources_needed: job.resources_needed,
-                resources_assigned: tp.resource_to_job,
+                resources_held: job.resources_held,
             });
         });
     });
@@ -148,24 +148,27 @@
         .attr("height", rectHeight)
         .attr("fill", d => jobColor(d.state))
         .attr("stroke", d => {
-            console.log(d.resources_assigned);
-
-            /*
-            if (Object.values(d.resources_assigned).map(val => val.name }).includes(d.jobName)) {
-                return "red";
+            border_colour = "#D3D3D3";
+            
+            if (d.resources_needed.length > 0) {
+                border_colour = "orange";
             }
-                */
 
-            return d.resources_needed.length > 0 ? "orange" : "#D3D3D3";
+            if (d.resources_held.length > 0) {
+                border_colour = "lightblue";
+            }
+
+            return border_colour
         })
         .attr("stroke-width", borderWidth)        // Border thickness
         .on("mouseover", function (event, d) {
-            const resourceNames = d.resources_needed.map(r => r.name).join(", ");
+            const neededResourcesNames = d.resources_needed.map(r => r.name).join(", ");
             d3.select("#tooltip")
                 .style("display", "block")
                 .html(`Job: ${d.jobName} (${d.task}) with state: ${d.state}<br>
                        Remaining: ${d.remaining - 1}<br>
-                       Resources needed: ${resourceNames ? resourceNames : "-"}`);
+                       Resources needed: ${neededResourcesNames ? neededResourcesNames : "-"}<br>
+                       Resources held: ${d.resources_held}`);
         })
         .on("mousemove", function (event) {
             d3.select("#tooltip")

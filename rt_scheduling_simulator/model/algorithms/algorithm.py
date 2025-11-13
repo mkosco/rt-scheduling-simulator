@@ -234,8 +234,12 @@ class Algorithm(ABC):
         
     def update_result(self, timepoint) -> None:
         active_job_copy = list(map(asdict, self.active_jobs))
-        resource_to_job_serialized = {
-            resource: asdict(job) if job is not None else None
-            for resource, job in copy.deepcopy(self.resource_to_job).items()
-        }            
-        self.result["timeline"].append({'timepoint' : timepoint, 'active_jobs' : active_job_copy, 'resource_to_job' : resource_to_job_serialized})
+        
+        for job in active_job_copy:
+            resources_held = []
+            for key, item in self.resource_to_job.items():
+                if item is not None and item.name == job['name']:
+                    resources_held.append(key)
+            job['resources_held'] = resources_held
+        
+        self.result["timeline"].append({'timepoint' : timepoint, 'active_jobs' : active_job_copy})
